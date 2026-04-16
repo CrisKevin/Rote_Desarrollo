@@ -9,7 +9,9 @@ public class CargoDocenteMapper {
         return new CargoDocenteDTO(
             entidad.getId(), 
             entidad.getCargo(),
-            entidad.getDescripcion());
+            entidad.getDescripcion(),
+            entidad.getEstado()
+        );
     }
 
     public static CargoDocente toEntity(CargoDocenteDTO dto){
@@ -17,6 +19,7 @@ public class CargoDocenteMapper {
         entidad.setId(dto.getId());
         entidad.setCargo(dto.getCargo());
         entidad.setDescripcion(dto.getDescripcion());
+        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

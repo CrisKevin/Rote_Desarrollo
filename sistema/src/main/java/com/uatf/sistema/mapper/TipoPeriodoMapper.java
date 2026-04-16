@@ -1,22 +1,25 @@
 package com.uatf.sistema.mapper;
 
-import com.uatf.sistema.dto.TipoDocenteDTO;
-import com.uatf.sistema.model.TipoDocente;
+import com.uatf.sistema.dto.TipoPeriodoDTO;
+import com.uatf.sistema.model.TipoPeriodo;
 
 public class TipoPeriodoMapper {
 
-    public static TipoDocenteDTO toDTO(TipoDocente entidad){
-        return new TipoDocenteDTO(
-            entidad.getId(),
+    public static TipoPeriodoDTO toDTO(TipoPeriodo entidad){
+        return new TipoPeriodoDTO(
+            entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion());
+            entidad.getDescripcion(), 
+            entidad.getEstado()
+        );
     }
 
-    public static TipoDocente toEntity(TipoDocenteDTO dto){
-        TipoDocente entidad = new TipoDocente();
-        entidad.setId(dto.getId());
-        entidad.setTipo(dto.getTipo());
-        entidad.setDescripcion(dto.getDescripcion());
-        return entidad;
+    public static TipoPeriodo toEntity(TipoPeriodoDTO dto){
+        TipoPeriodo tipoPeriodo = new TipoPeriodo();
+        tipoPeriodo.setId(dto.getId());
+        tipoPeriodo.setTipo(dto.getTipo());
+        tipoPeriodo.setDescripcion(dto.getDescripcion());
+        tipoPeriodo.setEstado(dto.getEstado());
+        return tipoPeriodo;
     }
 }

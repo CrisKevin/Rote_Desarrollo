@@ -9,14 +9,17 @@ public class TipoDocenteMapper {
         return new TipoDocenteDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion());        
+            entidad.getDescripcion(),
+            entidad.getEstado()
+        );        
     }
 
     public static TipoDocente toEntity(TipoDocenteDTO dto){
         TipoDocente entidad = new TipoDocente();
         entidad.setId(dto.getId());
         entidad.setTipo(dto.getTipo());
-        entidad.setDescripcion(dto.getTipo());
+        entidad.setDescripcion(dto.getDescripcion());
+        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

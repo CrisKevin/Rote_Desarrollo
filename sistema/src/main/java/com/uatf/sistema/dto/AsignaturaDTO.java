@@ -1,6 +1,7 @@
 package com.uatf.sistema.dto;
 
 import java.time.LocalTime;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,10 +10,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class AsignaturaDTO {
 
-    private long id;
+    private UUID id;
     private String nombre;
     private String sigla;
-    private LocalTime horasAsignadas;
-    private long unidadId;
-
+    private LocalTime horas_asignadas;
+    private UUID unidad_id;
+    private Boolean estado;
 }

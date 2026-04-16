@@ -1,6 +1,7 @@
 package com.uatf.sistema.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,14 +23,16 @@ import lombok.NoArgsConstructor;
 public class AsignaturaDocente {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @CreationTimestamp
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fecha_creacion;
 
     @UpdateTimestamp
-    private LocalDateTime fechaActualizacion;
+    private LocalDateTime fecha_actualizacion;
+
+    private Boolean estado = true;
 
     @ManyToOne
     @JoinColumn(name = "grupo_id",referencedColumnName = "id")

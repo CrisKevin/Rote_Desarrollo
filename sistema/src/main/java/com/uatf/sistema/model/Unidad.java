@@ -2,6 +2,7 @@ package com.uatf.sistema.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -24,8 +25,8 @@ import lombok.NoArgsConstructor;
 public class Unidad {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String nombre;
     private String sigla;
@@ -37,6 +38,8 @@ public class Unidad {
     @UpdateTimestamp
     private LocalDateTime fechaActualizacion;
     
+    private Boolean estado = true;
+
     @ManyToOne
     @JoinColumn(name = "tipo_unidad_id", referencedColumnName = "id")
     private TipoUnidad tipoUnidad;

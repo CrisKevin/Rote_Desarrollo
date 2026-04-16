@@ -9,7 +9,9 @@ public class GrupoMapper {
         return new GrupoDTO(
             entidad.getId(),
             entidad.getGrupo(),
-            entidad.getDescripcion());
+            entidad.getDescripcion(),
+            entidad.getEstado()
+        );
     }
     
     public static Grupo toEntity(GrupoDTO dto){
@@ -17,6 +19,7 @@ public class GrupoMapper {
         entidad.setId(dto.getId());
         entidad.setGrupo(dto.getGrupo());
         entidad.setDescripcion(dto.getDescripcion());
+        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

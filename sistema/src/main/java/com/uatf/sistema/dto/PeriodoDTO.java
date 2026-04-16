@@ -1,6 +1,7 @@
 package com.uatf.sistema.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +10,12 @@ import lombok.Data;
 @Data
 public class PeriodoDTO {
 
-    private long id;
+    private UUID id;
     private String descripcion;
     private LocalDateTime desde;
     private LocalDateTime hasta;
-    private Long gestionId;
-    private Long tipoPeriodoId;
+    private UUID gestion_id;
+    private UUID tipo_periodo_id;
+    private Boolean estado;
     
 }

@@ -1,5 +1,7 @@
 package com.uatf.sistema.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,8 +9,9 @@ import lombok.Data;
 @Data
 public class CargoTipoDTO {
 
-    private long id;
-    private long tipoDocenteId;
-    private long cargoDocenteId;
+    private UUID id;
+    private UUID tipo_docente_id;
+    private UUID cargo_docente_id;
+    private Boolean estado;
     
 }

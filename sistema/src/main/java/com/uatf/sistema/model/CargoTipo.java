@@ -2,6 +2,7 @@ package com.uatf.sistema.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -24,23 +25,25 @@ import lombok.NoArgsConstructor;
 public class CargoTipo {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @CreationTimestamp
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fecha_creacion;
 
     @UpdateTimestamp
-    private LocalDateTime fechaActualizacion;
-    
+    private LocalDateTime fecha_actualizacion;
+
+    private Boolean estado = true;
+
     @ManyToOne
     @JoinColumn(name = "tipo_id", referencedColumnName = "id")
-    private TipoDocente tipoDocente;
+    private TipoDocente tipo_docente;
 
     @ManyToOne
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
-    private CargoDocente cargoDocente;
+    private CargoDocente cargo_docente;
 
-    @OneToMany(mappedBy = "cargoTipo")
-    private List<CargoTipo> cargoTipos;
+    @OneToMany(mappedBy = "cargo_tipo")
+    private List<Docente> docentes;
 }
