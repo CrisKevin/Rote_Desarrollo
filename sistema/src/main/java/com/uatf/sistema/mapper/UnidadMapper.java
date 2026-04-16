@@ -11,7 +11,7 @@ public class UnidadMapper {
             entidad.getNombre(),
             entidad.getSigla(),
             entidad.getItem(),
-            entidad.getTipoUnidad().getId(),
+            entidad.getTipo_unidad().getId(),
             entidad.getUnidad() != null ? entidad.getUnidad().getId() : null,
             entidad.getEstado()
         );

@@ -53,7 +53,7 @@ public class UnidadService {
             .orElseThrow(() -> new ResourceNotFoundException("TipoUnidad no encontrado"));
 
         unidad.setUnidad(dependiente);
-        unidad.setTipoUnidad(tipoUnidad);
+        unidad.setTipo_unidad(tipoUnidad);
 
         return UnidadMapper.toDTO(repo.save(unidad));
     }
@@ -77,7 +77,7 @@ public class UnidadService {
         unidad.setItem(dto.getItem());
         unidad.setSigla(dto.getSigla());
         unidad.setUnidad(dependiente);
-        unidad.setTipoUnidad(tipoUnidad);
+        unidad.setTipo_unidad(tipoUnidad);
         unidad.setEstado(dto.getEstado());
 
         return UnidadMapper.toDTO(repo.save(unidad));

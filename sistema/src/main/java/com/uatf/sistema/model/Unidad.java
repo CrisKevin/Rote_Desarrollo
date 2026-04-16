@@ -42,7 +42,7 @@ public class Unidad {
 
     @ManyToOne
     @JoinColumn(name = "tipo_unidad_id", referencedColumnName = "id")
-    private TipoUnidad tipoUnidad;
+    private TipoUnidad tipo_unidad;
 
     @ManyToOne
     @JoinColumn(name = "dependiente_id", referencedColumnName = "id", nullable = true)
