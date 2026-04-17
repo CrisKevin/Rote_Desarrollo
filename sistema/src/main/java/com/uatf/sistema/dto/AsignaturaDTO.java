@@ -15,5 +15,4 @@ public class AsignaturaDTO {
     private String sigla;
     private LocalTime horas_asignadas;
     private UUID unidad_id;
-    private Boolean estado;
 }

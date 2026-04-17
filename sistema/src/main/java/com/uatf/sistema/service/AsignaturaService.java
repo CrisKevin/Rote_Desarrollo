@@ -25,19 +25,30 @@ public class AsignaturaService {
         this.unidad_repo = unidad_repo;
     }
 
-    public List<AsignaturaDTO> service_get_all() {
+    public List<AsignaturaDTO> findAll() {
         return repo.findAll().stream().map(AsignaturaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public AsignaturaDTO service_find_by_UUII(UUID id) {
+    public List<AsignaturaDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(AsignaturaMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public AsignaturaDTO findOne(UUID id) {
         Asignatura asignatura = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Asignatura no encontrada"));
+            .orElseThrow(() -> new ResourceNotFoundException("Asignatura no encontrada"));
         return AsignaturaMapper.toDTO(asignatura);
 
     }
 
-    public AsignaturaDTO service_save(AsignaturaDTO dto) {
+    public AsignaturaDTO findOneActive(UUID id){
+        Asignatura asignatura = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Asignatura no encontrada"));
+        return AsignaturaMapper.toDTO(asignatura);
+    }
+
+    public AsignaturaDTO create(AsignaturaDTO dto) {
         Asignatura asignatura = AsignaturaMapper.toEntity(dto);
 
         Unidad unidad = unidad_repo.findById(dto.getUnidad_id())
@@ -48,7 +59,7 @@ public class AsignaturaService {
         return AsignaturaMapper.toDTO(repo.save(asignatura));
     }
 
-    public AsignaturaDTO service_update(UUID id, AsignaturaDTO dto) {
+    public AsignaturaDTO update(UUID id, AsignaturaDTO dto) {
 
         Asignatura asignatura = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Asignatura no encontrada"));
@@ -60,13 +71,19 @@ public class AsignaturaService {
         asignatura.setSigla(dto.getSigla());
         asignatura.setUnidad(unidad);
         asignatura.setHoras_asignadas(dto.getHoras_asignadas());
-        asignatura.setEstado(dto.getEstado());
 
         Asignatura guardado = repo.save(asignatura);
         return AsignaturaMapper.toDTO(guardado);
     }
 
-    public void service_delete(UUID id) {
+    public void delete(UUID id) {
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){ 
+        Asignatura asignatura = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Asignatura no encontrada"));
+        asignatura.setEstado(false);
+        repo.save(asignatura);
     }
 }

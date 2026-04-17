@@ -9,8 +9,7 @@ public class TipoDocenteMapper {
         return new TipoDocenteDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion(),
-            entidad.getEstado()
+            entidad.getDescripcion()
         );        
     }
 
@@ -19,7 +18,6 @@ public class TipoDocenteMapper {
         entidad.setId(dto.getId());
         entidad.setTipo(dto.getTipo());
         entidad.setDescripcion(dto.getDescripcion());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

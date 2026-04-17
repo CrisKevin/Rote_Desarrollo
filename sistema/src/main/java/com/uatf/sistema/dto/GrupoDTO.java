@@ -11,6 +11,5 @@ public class GrupoDTO {
     private UUID id;
     private String grupo;
     private String descripcion;
-    private Boolean estado;
     
 }

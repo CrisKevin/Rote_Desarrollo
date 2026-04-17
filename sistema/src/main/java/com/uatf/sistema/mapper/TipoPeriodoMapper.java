@@ -9,8 +9,7 @@ public class TipoPeriodoMapper {
         return new TipoPeriodoDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion(), 
-            entidad.getEstado()
+            entidad.getDescripcion()
         );
     }
 
@@ -19,7 +18,6 @@ public class TipoPeriodoMapper {
         tipoPeriodo.setId(dto.getId());
         tipoPeriodo.setTipo(dto.getTipo());
         tipoPeriodo.setDescripcion(dto.getDescripcion());
-        tipoPeriodo.setEstado(dto.getEstado());
         return tipoPeriodo;
     }
 }

@@ -9,8 +9,7 @@ public class TipoUnidadMapper {
         return new TipoUnidadDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion(),
-            entidad.getEstado()
+            entidad.getDescripcion()
         );
     }
 
@@ -19,7 +18,6 @@ public class TipoUnidadMapper {
         entidad.setId(dto.getId());
         entidad.setTipo(dto.getTipo());
         entidad.setDescripcion(dto.getDescripcion());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

@@ -48,6 +48,10 @@ public class Docente {
     @JoinColumn(name = "cargo_tipo_id", referencedColumnName = "id")
     private CargoTipo cargo_tipo;
 
+    @ManyToOne
+    @JoinColumn(name = "unidad_id", referencedColumnName = "id")
+    private Unidad unidad;
+
     @OneToMany(mappedBy = "docente")
     private List<AsignaturaDocente> asignatura_docentes;
 }

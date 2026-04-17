@@ -14,5 +14,5 @@ public class DocenteDTO {
     private String ci;
     private String observaciones;
     private UUID cargo_tipo_id;
-    private Boolean estado;
+    private UUID unidad_id;
 }

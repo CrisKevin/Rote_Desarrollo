@@ -15,6 +15,5 @@ public class AsignaturaDocenteDTO {
     private UUID asignatura_id;
     private UUID observacion_id;
     private UUID periodo_id;
-    private Boolean estado;
     
 }

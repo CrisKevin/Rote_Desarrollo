@@ -2,7 +2,6 @@ package com.uatf.sistema.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -29,12 +28,15 @@ public class PeriodoService {
         this.tipo_periodo_repo = tipo_periodo_repo;
     }
 
-    public List<PeriodoDTO> service_get_all(){
-        return repo.findAll().stream().map(PeriodoMapper::toDTO)
-            .collect(Collectors.toList());
+    public List<PeriodoDTO> findAll(){
+        return repo.findAll().stream().map(PeriodoMapper::toDTO).toList();
     }
 
-    public PeriodoDTO find_by_UUID(UUID id){
+    public List<PeriodoDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(PeriodoMapper::toDTO).toList();
+    }
+
+    public PeriodoDTO findOne(UUID id){
         
         Periodo periodo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Periodo no encontrado"));
@@ -42,7 +44,15 @@ public class PeriodoService {
         return PeriodoMapper.toDTO(periodo);
     }
 
-    public PeriodoDTO service_save(PeriodoDTO dto){
+    public PeriodoDTO findOneActive(UUID id){
+        
+        Periodo periodo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Periodo no encontrado"));
+
+        return PeriodoMapper.toDTO(periodo);
+    }
+
+    public PeriodoDTO create(PeriodoDTO dto){
 
         Periodo periodo = PeriodoMapper.toEntity(dto);
         Gestion gestion = gestion_repo.findById(dto.getGestion_id())
@@ -56,7 +66,7 @@ public class PeriodoService {
         return PeriodoMapper.toDTO(repo.save(periodo));
     }
 
-    public PeriodoDTO service_update(UUID id, PeriodoDTO dto){
+    public PeriodoDTO update(UUID id, PeriodoDTO dto){
 
         Periodo periodo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Periodo no encontrado"));
@@ -68,15 +78,20 @@ public class PeriodoService {
         periodo.setDescripcion(dto.getDescripcion());
         periodo.setDesde(dto.getDesde());
         periodo.setHasta(dto.getHasta());
-        periodo.setEstado(dto.getEstado());
         periodo.setGestion(gestion);
         periodo.setTipo_periodo(tipoPeriodo);
 
         return PeriodoMapper.toDTO(repo.save(periodo));
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
     }
     
+    public void softDelete(UUID id){
+        Periodo periodo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Periodo no encontrado"));
+        periodo.setEstado(false);
+        repo.save(periodo);
+    }
 }

@@ -12,6 +12,5 @@ public class CargoTipoDTO {
     private UUID id;
     private UUID tipo_docente_id;
     private UUID cargo_docente_id;
-    private Boolean estado;
     
 }

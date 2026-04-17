@@ -2,7 +2,6 @@ package com.uatf.sistema.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -21,12 +20,15 @@ public class GrupoService {
         this.repo = repo;
     }
 
-    public List<GrupoDTO> service_get_all(){
-        return repo.findAll().stream().map(GrupoMapper::toDTO)
-            .collect(Collectors.toList());
+    public List<GrupoDTO> findAll(){
+        return repo.findAll().stream().map(GrupoMapper::toDTO).toList();
     }
 
-    public GrupoDTO service_find_by_UUID(UUID id){
+    public List<GrupoDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(GrupoMapper::toDTO).toList();
+    }
+
+    public GrupoDTO findOne(UUID id){
 
         Grupo grupo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado"));
@@ -34,28 +36,40 @@ public class GrupoService {
         return GrupoMapper.toDTO(grupo);
     }
 
-    public GrupoDTO service_save(GrupoDTO dto){
+    public GrupoDTO findOneActive(UUID id){
+
+        Grupo grupo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado"));
+
+        return GrupoMapper.toDTO(grupo);
+    }
+
+    public GrupoDTO create(GrupoDTO dto){
 
         Grupo grupo = GrupoMapper.toEntity(dto);
 
         return GrupoMapper.toDTO(repo.save(grupo));
     }
 
-    public GrupoDTO service_update(UUID id, GrupoDTO dto){
+    public GrupoDTO update(UUID id, GrupoDTO dto){
 
         Grupo grupo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado"));
 
         grupo.setGrupo(dto.getGrupo());
         grupo.setDescripcion(dto.getDescripcion());
-        grupo.setEstado(dto.getEstado());
         return GrupoMapper.toDTO(repo.save(grupo));
     }
 
-    public void service_delete(UUID id){
-        
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
 
+    public void softDelete(UUID id){
+        Grupo grupo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado"));
+        grupo.setEstado(false);
+        repo.save(grupo);
     }
     
 }

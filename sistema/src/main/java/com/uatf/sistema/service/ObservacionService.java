@@ -2,7 +2,6 @@ package com.uatf.sistema.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -21,26 +20,36 @@ public class ObservacionService {
         this.repo = repo;
     }
 
-    public List<ObservacionDTO> service_get_all(){
-        return repo.findAll().stream().map(ObservacionMapper::toDTO)
-            .collect(Collectors.toList());
+    public List<ObservacionDTO> findAll(){
+        return repo.findAll().stream().map(ObservacionMapper::toDTO).toList();
     }
 
-    public ObservacionDTO service_find_by_UUID(UUID id){
+    public List<ObservacionDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(ObservacionMapper::toDTO).toList();
+    }
+
+    public ObservacionDTO findOne(UUID id){
         Observacion observacion = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Observación no encontrada"));
 
         return ObservacionMapper.toDTO(observacion);
     }
 
-    public ObservacionDTO service_save(ObservacionDTO dto){
+    public ObservacionDTO findOneActive(UUID id){
+        Observacion observacion = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Observación no encontrada"));
+
+        return ObservacionMapper.toDTO(observacion);
+    }
+
+    public ObservacionDTO create(ObservacionDTO dto){
         
         Observacion observacion = ObservacionMapper.toEntity(dto);
 
         return ObservacionMapper.toDTO(repo.save(observacion));
     }
 
-    public ObservacionDTO service_update(UUID id, ObservacionDTO dto){
+    public ObservacionDTO update(UUID id, ObservacionDTO dto){
 
         Observacion observacion = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Observacion no encontrada"));
@@ -48,12 +57,18 @@ public class ObservacionService {
         observacion.setDescripcion(dto.getDescripcion());
         observacion.setDesde(dto.getDesde());
         observacion.setHasta(dto.getHasta());
-        observacion.setEstado(dto.getEstado());
 
         return ObservacionMapper.toDTO(repo.save(observacion));
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){
+        Observacion observacion = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Observacion no encontrada"));
+        observacion.setEstado(false);
+        repo.save(observacion);
     }
 }

@@ -9,8 +9,7 @@ public class GestionMapper {
         return new GestionDTO(
             entidad.getId(), 
             entidad.getGestion(), 
-            entidad.getDescripcion(),
-            entidad.getEstado()
+            entidad.getDescripcion()
         );
     }
 
@@ -19,7 +18,6 @@ public class GestionMapper {
         entidad.setId(dto.getId());
         entidad.setGestion(dto.getGestion());
         entidad.setDescripcion(dto.getDescripcion());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

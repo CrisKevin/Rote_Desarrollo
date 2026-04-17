@@ -29,29 +29,44 @@ public class PeriodoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PeriodoDTO>> controller_get_all(){
-        return ResponseEntity.ok(service.service_get_all());
+    public ResponseEntity<List<PeriodoDTO>> findAll(){
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<PeriodoDTO>> findAllActive(){
+        return ResponseEntity.ok(service.findAllActive());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PeriodoDTO> controller_find_by_id(@PathVariable UUID id){
-        return ResponseEntity.ok(service.find_by_UUID(id));
+    public ResponseEntity<PeriodoDTO> findOne(@PathVariable UUID id){
+        return ResponseEntity.ok(service.findOne(id));
+    }
+
+    @GetMapping("/active/{id}")
+    public ResponseEntity<PeriodoDTO> findOneActive(@PathVariable UUID id){
+        return ResponseEntity.ok(service.findOneActive(id));
     }
 
     @PostMapping
-    public ResponseEntity<PeriodoDTO> controller_save(@RequestBody PeriodoDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.service_save(dto));
+    public ResponseEntity<PeriodoDTO> create(@RequestBody PeriodoDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<PeriodoDTO> controller_update(@PathVariable UUID id, @RequestBody PeriodoDTO dto){
-        return ResponseEntity.ok(service.service_update(id, dto));
+    public ResponseEntity<PeriodoDTO> update(@PathVariable UUID id, @RequestBody PeriodoDTO dto){
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> controller_delete(@PathVariable UUID id){
-        service.service_delete(id);
+    public ResponseEntity<Void> delete(@PathVariable UUID id){
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
     
+    @DeleteMapping("/soft/{id}")
+    public ResponseEntity<Void> softDelete(@PathVariable UUID id){
+        service.softDelete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -12,8 +12,7 @@ public class UnidadMapper {
             entidad.getSigla(),
             entidad.getItem(),
             entidad.getTipo_unidad().getId(),
-            entidad.getUnidad() != null ? entidad.getUnidad().getId() : null,
-            entidad.getEstado()
+            entidad.getUnidad() != null ? entidad.getUnidad().getId() : null
         );
     }
 
@@ -23,7 +22,6 @@ public class UnidadMapper {
         entidad.setNombre(dto.getNombre());
         entidad.setSigla(dto.getSigla());
         entidad.setItem(dto.getItem());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
     

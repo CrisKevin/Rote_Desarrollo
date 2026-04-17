@@ -13,7 +13,7 @@ public class DocenteMapper {
             entidad.getCi(), 
             entidad.getObservaciones(),
             entidad.getCargo_tipo().getId(),
-            entidad.getEstado()
+            entidad.getUnidad().getId()
         );
     }
 
@@ -24,7 +24,6 @@ public class DocenteMapper {
         entidad.setApellidos(dto.getApellidos());
         entidad.setCi(dto.getCi());
         entidad.setObservaciones(dto.getObservaciones());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

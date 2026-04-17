@@ -9,15 +9,13 @@ public class CargoTipoMapper {
         return new CargoTipoDTO(
             entidad.getId(), 
             entidad.getTipo_docente().getId(), 
-            entidad.getCargo_docente().getId(),
-            entidad.getEstado()
+            entidad.getCargo_docente().getId()
         );
     }
 
     public static CargoTipo toEntity(CargoTipoDTO dto){
         CargoTipo entidad = new CargoTipo();
         entidad.setId(dto.getId());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
 }

@@ -12,6 +12,5 @@ public class CargoDocenteDTO {
     private UUID id;
     private String cargo;
     private String descripcion;
-    private Boolean estado;
     
 }

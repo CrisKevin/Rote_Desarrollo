@@ -12,6 +12,5 @@ public class GestionDTO {
     private UUID id;
     private String gestion;
     private String descripcion;
-    private Boolean estado;
 
 }

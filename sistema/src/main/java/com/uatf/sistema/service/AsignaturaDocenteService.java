@@ -43,18 +43,29 @@ public class AsignaturaDocenteService {
         this.periodo_repo = periodo_repo;
     }
 
-    public List<AsignaturaDocenteDTO> service_get_all(){
+    public List<AsignaturaDocenteDTO> findAll(){
         return repo.findAll().stream().map(AsignaturaDocenteMapper::toDTO)
             .collect(Collectors.toList());
     }
 
-    public AsignaturaDocenteDTO service_find_by_UUID(UUID id){
+    public List<AsignaturaDocenteDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(AsignaturaDocenteMapper::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public AsignaturaDocenteDTO findOne(UUID id){
         AsignaturaDocente asignatura = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("AsignaturaDocente no encontrado"));
         return AsignaturaDocenteMapper.toDTO(asignatura);
     }
 
-    public AsignaturaDocenteDTO service_save(AsignaturaDocenteDTO dto){
+    public AsignaturaDocenteDTO findOneActive(UUID id){
+        AsignaturaDocente asignatura = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("AsignaturaDocente no encontrado"));
+        return AsignaturaDocenteMapper.toDTO(asignatura);
+    }
+
+    public AsignaturaDocenteDTO create(AsignaturaDocenteDTO dto){
 
         AsignaturaDocente asignatura = AsignaturaDocenteMapper.toEntity(dto);
 
@@ -83,9 +94,9 @@ public class AsignaturaDocenteService {
 
     }
 
-    public AsignaturaDocenteDTO service_update(UUID id, AsignaturaDocenteDTO dto){
+    public AsignaturaDocenteDTO update(UUID id, AsignaturaDocenteDTO dto){
 
-        AsignaturaDocente asignatura = repo.findById(id)
+        AsignaturaDocente asignatura = repo.findByIdAndEstadoTrue(id)
             .orElseThrow(() -> new ResourceNotFoundException("AsignaturDocente no encontrado"));
 
         Grupo grupo = grupo_repo.findById(dto.getGrupo_id())
@@ -108,13 +119,19 @@ public class AsignaturaDocenteService {
         asignatura.setGrupo(grupo);
         asignatura.setPeriodo(periodo);
         asignatura.setObservacion(observacion);
-        asignatura.setEstado(dto.getEstado());
 
         AsignaturaDocente guardado = repo.save(asignatura);
         return AsignaturaDocenteMapper.toDTO(guardado);
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){
+        AsignaturaDocente asignaturaDocente = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("AsignaturaDocente no encontrado"));
+        asignaturaDocente.setEstado(false);
+        repo.save(asignaturaDocente);
     }
 }

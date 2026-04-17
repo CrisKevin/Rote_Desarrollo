@@ -21,34 +21,51 @@ public class CargoDocenteService {
         this.repo = repo;
     }
 
-    public List<CargoDocenteDTO> service_get_all(){
+    public List<CargoDocenteDTO> findAll(){
         return repo.findAll().stream().map(CargoDocenteMapper::toDTO)
             .collect(Collectors.toList());
     }
 
-    public CargoDocenteDTO service_get_by_UUID(UUID id){
+    public List<CargoDocenteDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(CargoDocenteMapper::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public CargoDocenteDTO findOne(UUID id){
         CargoDocente cargoDocente = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("CargoDocente no encontrado"));
         return CargoDocenteMapper.toDTO(cargoDocente);
     }
 
-    public CargoDocenteDTO service_save(CargoDocenteDTO dto){
+    public CargoDocenteDTO findOneActive(UUID id){
+        CargoDocente cargoDocente = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("CargoDocente no encontrado"));
+        return CargoDocenteMapper.toDTO(cargoDocente);
+    }
+
+    public CargoDocenteDTO create(CargoDocenteDTO dto){
         CargoDocente cargoDocente = CargoDocenteMapper.toEntity(dto);
         return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
     }
 
-    public CargoDocenteDTO service_update(UUID id, CargoDocenteDTO dto){
+    public CargoDocenteDTO update(UUID id, CargoDocenteDTO dto){
         CargoDocente cargoDocente = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("CargoDocente no encontrado"));
 
         cargoDocente.setCargo(dto.getCargo());
         cargoDocente.setDescripcion(dto.getDescripcion());
-        cargoDocente.setEstado(dto.getEstado());
 
         return CargoDocenteMapper.toDTO(cargoDocente);
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){
+        CargoDocente cargoDocente = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException(null));
+        cargoDocente.setEstado(false);
+        repo.save(cargoDocente);
     }
 }

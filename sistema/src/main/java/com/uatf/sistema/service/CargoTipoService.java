@@ -29,19 +29,31 @@ public class CargoTipoService {
         this.tipo_docente_repo = tipo_docente_repo;
     }
 
-    public List<CargoTipoDTO> service_get_all(){
+    public List<CargoTipoDTO> findAll(){
         return repo.findAll().stream().map(CargoTipoMapper::toDTO)
             .collect(Collectors.toList());
     }
 
-    public CargoTipoDTO service_find_by_UUID(UUID id){
+    public List<CargoTipoDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(CargoTipoMapper::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public CargoTipoDTO findOne(UUID id){
         CargoTipo cargoTipo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("CargoTipo no encontrado"));
 
         return CargoTipoMapper.toDTO(cargoTipo);
     }
 
-    public CargoTipoDTO service_save(CargoTipoDTO dto){
+    public CargoTipoDTO findOneActive(UUID id){
+        CargoTipo cargoTipo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("CargoTipo no encontrado"));
+
+        return CargoTipoMapper.toDTO(cargoTipo);
+    }
+
+    public CargoTipoDTO create(CargoTipoDTO dto){
         CargoTipo cargoTipo = CargoTipoMapper.toEntity(dto);
 
         CargoDocente cargoDocente = cargo_docente_repo.findById(dto.getCargo_docente_id())
@@ -56,7 +68,7 @@ public class CargoTipoService {
         return CargoTipoMapper.toDTO(repo.save(cargoTipo));
     }
 
-    public CargoTipoDTO service_update(UUID id, CargoTipoDTO dto){
+    public CargoTipoDTO update(UUID id, CargoTipoDTO dto){
         CargoTipo cargoTipo = repo.findById(id)
             .orElseThrow(() -> new RuntimeException("CargoTipo no encontrado"));
         
@@ -66,15 +78,20 @@ public class CargoTipoService {
         TipoDocente tipoDocente = tipo_docente_repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("TipoDocente no encontrado"));
         
-        cargoTipo.setEstado(dto.getEstado());
         cargoTipo.setCargo_docente(cargoDocente);
         cargoTipo.setTipo_docente(tipoDocente);
 
         return CargoTipoMapper.toDTO(repo.save(cargoTipo));
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
     }
 
+    public void softDelete(UUID id){
+        CargoTipo cargoTipo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("CargoTipo no encontrado"));
+        cargoTipo.setEstado(false);
+        repo.save(cargoTipo);
+    }
 }

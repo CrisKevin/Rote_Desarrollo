@@ -12,5 +12,4 @@ public class TipoUnidadDTO {
     private UUID id;
     private String tipo;
     private String descripcion;
-    private Boolean estado;
 }

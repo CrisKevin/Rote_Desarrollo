@@ -13,6 +13,5 @@ public class ObservacionDTO {
     private String descripcion;
     private LocalDateTime desde;
     private LocalDateTime hasta;
-    private Boolean estado;
 
 }

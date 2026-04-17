@@ -2,7 +2,6 @@ package com.uatf.sistema.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -21,12 +20,15 @@ public class TipoPeriodoService {
         this.repo = repo;
     }
 
-    public List<TipoPeriodoDTO> service_get_all(){
-        return repo.findAll().stream().map(TipoPeriodoMapper::toDTO)
-            .collect(Collectors.toList());
+    public List<TipoPeriodoDTO> findAll(){
+        return repo.findAll().stream().map(TipoPeriodoMapper::toDTO).toList();
     }
 
-    public TipoPeriodoDTO service_find_by_UUID(UUID id){
+    public List<TipoPeriodoDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(TipoPeriodoMapper::toDTO).toList();
+    }
+
+    public TipoPeriodoDTO findOne(UUID id){
 
         TipoPeriodo tipoPeriodo =  repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("TipoPeriodo no encontrado"));
@@ -34,26 +36,41 @@ public class TipoPeriodoService {
         return TipoPeriodoMapper.toDTO(tipoPeriodo);
     }
 
-    public TipoPeriodoDTO service_save(TipoPeriodoDTO dto){
+
+    public TipoPeriodoDTO findOneActive(UUID id){
+
+        TipoPeriodo tipoPeriodo =  repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("TipoPeriodo no encontrado"));
+        
+        return TipoPeriodoMapper.toDTO(tipoPeriodo);
+    }
+
+    public TipoPeriodoDTO create(TipoPeriodoDTO dto){
 
         TipoPeriodo tipoPeriodo = TipoPeriodoMapper.toEntity(dto);
 
         return TipoPeriodoMapper.toDTO(repo.save(tipoPeriodo));
     }
 
-    public TipoPeriodoDTO service_update(UUID id, TipoPeriodoDTO dto){
+    public TipoPeriodoDTO update(UUID id, TipoPeriodoDTO dto){
 
         TipoPeriodo tipoPeriodo = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("TipoPeriodo no encontrado"));
 
         tipoPeriodo.setTipo(dto.getTipo());
         tipoPeriodo.setDescripcion(dto.getDescripcion());
-        tipoPeriodo.setEstado(dto.getEstado());
 
         return TipoPeriodoMapper.toDTO(repo.save(tipoPeriodo));
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){
+        TipoPeriodo tipoPeriodo = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("TipoPeriodo no encontrado"));
+        tipoPeriodo.setEstado(false);
+        repo.save(tipoPeriodo);
     }
 }

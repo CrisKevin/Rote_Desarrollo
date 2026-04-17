@@ -14,6 +14,6 @@ public class UnidadDTO {
     private String sigla;
     private Integer item;
     private UUID tipo_unidad_id;
-    private UUID unidad_id;
-    private Boolean estado;
+    private UUID dependiente_id;
+    
 }

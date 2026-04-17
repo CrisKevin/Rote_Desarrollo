@@ -2,7 +2,6 @@ package com.uatf.sistema.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -21,12 +20,15 @@ public class TipoUnidadService {
         this.repo = repo;
     }
 
-    public List<TipoUnidadDTO> service_get_all(){
-        return repo.findAll().stream().map(TipoUnidadMapper::toDTO)
-            .collect(Collectors.toList());
+    public List<TipoUnidadDTO> findAll(){
+        return repo.findAll().stream().map(TipoUnidadMapper::toDTO).toList();
     }
 
-    public TipoUnidadDTO service_find_by_UUID(UUID id){
+    public List<TipoUnidadDTO> findAllActive(){
+        return repo.findByEstado(true).stream().map(TipoUnidadMapper::toDTO).toList();
+    }
+
+    public TipoUnidadDTO findOne(UUID id){
 
         TipoUnidad tipoUnidad = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("TipoUnidad no encontrado"));
@@ -34,26 +36,40 @@ public class TipoUnidadService {
         return TipoUnidadMapper.toDTO(tipoUnidad);
     }
 
-    public TipoUnidadDTO service_save(TipoUnidadDTO dto){
+    public TipoUnidadDTO findOneActive(UUID id){
+
+        TipoUnidad tipoUnidad = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("TipoUnidad no encontrado"));
+
+        return TipoUnidadMapper.toDTO(tipoUnidad);
+    }
+
+    public TipoUnidadDTO create(TipoUnidadDTO dto){
         
         TipoUnidad tipoUnidad = TipoUnidadMapper.toEntity(dto);
 
         return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
     }
 
-    public TipoUnidadDTO service_update(UUID id, TipoUnidadDTO dto){
+    public TipoUnidadDTO update(UUID id, TipoUnidadDTO dto){
 
         TipoUnidad tipoUnidad = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("TipoUnidad no encontrado"));
 
         tipoUnidad.setTipo(dto.getTipo());
         tipoUnidad.setDescripcion(dto.getDescripcion());
-        tipoUnidad.setEstado(dto.getEstado());
 
         return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
     }
 
-    public void service_delete(UUID id){
+    public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    public void softDelete(UUID id){
+        TipoUnidad tipoUnidad = repo.findByIdAndEstadoTrue(id)
+            .orElseThrow(() -> new ResourceNotFoundException("TipoUnidad no encontrado"));
+        tipoUnidad.setEstado(false);
+        repo.save(tipoUnidad);
     }
 }

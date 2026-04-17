@@ -16,6 +16,5 @@ public class PeriodoDTO {
     private LocalDateTime hasta;
     private UUID gestion_id;
     private UUID tipo_periodo_id;
-    private Boolean estado;
     
 }

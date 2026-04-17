@@ -12,8 +12,7 @@ public class PeriodoMapper {
             entidad.getDesde(), 
             entidad.getHasta(), 
             entidad.getGestion().getId(), 
-            entidad.getTipo_periodo().getId(),
-            entidad.getEstado()
+            entidad.getTipo_periodo().getId()
         );
     }
 
@@ -23,7 +22,6 @@ public class PeriodoMapper {
         entidad.setDescripcion(dto.getDescripcion());
         entidad.setDesde(dto.getDesde());
         entidad.setHasta(dto.getHasta());
-        entidad.setEstado(dto.getEstado());
         return entidad;
     }
     
