@@ -8,8 +8,10 @@ public class CargoTipoMapper {
     public static CargoTipoDTO toDTO(CargoTipo entidad){
         return new CargoTipoDTO(
             entidad.getId(), 
-            entidad.getTipo_docente().getId(), 
-            entidad.getCargo_docente().getId()
+            entidad.getTipo_docente().getId(),
+            entidad.getTipo_docente().getTipo(), 
+            entidad.getCargo_docente().getId(),
+            entidad.getCargo_docente().getCargo()
         );
     }
 

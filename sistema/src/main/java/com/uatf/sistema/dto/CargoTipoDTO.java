@@ -11,6 +11,8 @@ public class CargoTipoDTO {
 
     private UUID id;
     private UUID tipo_docente_id;
+    private String tipo_docente_nombre;
     private UUID cargo_docente_id;
+    private String cargo_docente_nombre;
     
 }

@@ -9,10 +9,16 @@ public class AsignaturaDocenteMapper {
         return new AsignaturaDocenteDTO(
                 entidad.getId(),
                 entidad.getGrupo().getId(),
+                entidad.getGrupo().getGrupo(),
                 entidad.getDocente().getId(),
+                entidad.getDocente().getNombre(),
+                entidad.getDocente().getApellidos(),
                 entidad.getAsignatura().getId(),
+                entidad.getAsignatura().getNombre(),
                 entidad.getObservacion().getId(),
-                entidad.getPeriodo().getId()
+                entidad.getObservacion().getDescripcion(),
+                entidad.getPeriodo().getId(),
+                entidad.getPeriodo().getDescripcion()
         );
     }
 

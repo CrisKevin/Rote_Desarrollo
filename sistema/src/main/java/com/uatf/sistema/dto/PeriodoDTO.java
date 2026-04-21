@@ -15,6 +15,8 @@ public class PeriodoDTO {
     private LocalDateTime desde;
     private LocalDateTime hasta;
     private UUID gestion_id;
+    private String gestion_nombre;
     private UUID tipo_periodo_id;
+    private String tipo_periodo_nombre;
     
 }

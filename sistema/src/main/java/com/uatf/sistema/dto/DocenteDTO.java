@@ -15,4 +15,5 @@ public class DocenteDTO {
     private String observaciones;
     private UUID cargo_tipo_id;
     private UUID unidad_id;
+    private String unidad_nombre;
 }

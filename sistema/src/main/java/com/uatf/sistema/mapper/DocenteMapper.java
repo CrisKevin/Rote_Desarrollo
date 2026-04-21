@@ -13,7 +13,8 @@ public class DocenteMapper {
             entidad.getCi(), 
             entidad.getObservaciones(),
             entidad.getCargo_tipo().getId(),
-            entidad.getUnidad().getId()
+            entidad.getUnidad().getId(),
+            entidad.getUnidad().getNombre()
         );
     }
 

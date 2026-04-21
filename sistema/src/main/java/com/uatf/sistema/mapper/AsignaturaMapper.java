@@ -11,7 +11,8 @@ public class AsignaturaMapper {
             entidad.getNombre(),
             entidad.getSigla(),
             entidad.getHoras_asignadas(),
-            entidad.getUnidad().getId()
+            entidad.getUnidad().getId(),
+            entidad.getUnidad().getNombre()
         );
     }
 
