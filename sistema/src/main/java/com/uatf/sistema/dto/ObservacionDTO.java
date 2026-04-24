@@ -13,5 +13,6 @@ public class ObservacionDTO {
     private String descripcion;
     private LocalDateTime desde;
     private LocalDateTime hasta;
+    private LocalDateTime fecha_creacion;
 
 }

@@ -14,7 +14,8 @@ public class PeriodoMapper {
             entidad.getGestion().getId(),
             entidad.getGestion().getDescripcion(),
             entidad.getTipo_periodo().getId(),
-            entidad.getTipo_periodo().getTipo()
+            entidad.getTipo_periodo().getTipo(),
+            entidad.getFecha_creacion()
         );
     }
 

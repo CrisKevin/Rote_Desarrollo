@@ -1,5 +1,6 @@
 package com.uatf.sistema.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -11,4 +12,5 @@ public class TipoDocenteDTO {
     private UUID id;
     private String tipo;
     private String descripcion;
+    private LocalDateTime fecha_creacion;
 }

@@ -9,7 +9,8 @@ public class CargoDocenteMapper {
         return new CargoDocenteDTO(
             entidad.getId(), 
             entidad.getCargo(),
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );
     }
 

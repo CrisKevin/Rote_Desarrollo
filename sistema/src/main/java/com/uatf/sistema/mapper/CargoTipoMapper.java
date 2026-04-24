@@ -11,7 +11,8 @@ public class CargoTipoMapper {
             entidad.getTipo_docente().getId(),
             entidad.getTipo_docente().getTipo(), 
             entidad.getCargo_docente().getId(),
-            entidad.getCargo_docente().getCargo()
+            entidad.getCargo_docente().getCargo(),
+            entidad.getFecha_creacion()
         );
     }
 

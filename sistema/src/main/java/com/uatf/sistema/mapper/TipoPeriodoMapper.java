@@ -9,7 +9,8 @@ public class TipoPeriodoMapper {
         return new TipoPeriodoDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );
     }
 

@@ -9,7 +9,8 @@ public class GestionMapper {
         return new GestionDTO(
             entidad.getId(), 
             entidad.getGestion(), 
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );
     }
 

@@ -18,7 +18,9 @@ public class AsignaturaDocenteMapper {
                 entidad.getObservacion().getId(),
                 entidad.getObservacion().getDescripcion(),
                 entidad.getPeriodo().getId(),
-                entidad.getPeriodo().getDescripcion()
+                entidad.getPeriodo().getDescripcion(),
+                entidad.getFecha_creacion()
+                
         );
     }
 

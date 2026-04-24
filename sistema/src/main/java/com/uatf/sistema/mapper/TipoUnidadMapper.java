@@ -9,7 +9,8 @@ public class TipoUnidadMapper {
         return new TipoUnidadDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );
     }
 

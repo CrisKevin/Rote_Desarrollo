@@ -9,7 +9,8 @@ public class TipoDocenteMapper {
         return new TipoDocenteDTO(
             entidad.getId(), 
             entidad.getTipo(), 
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );        
     }
 

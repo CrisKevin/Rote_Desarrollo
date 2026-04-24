@@ -33,11 +33,11 @@ public class Unidad {
     private Integer item;
 
     @CreationTimestamp
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fecha_creacion;
 
     @UpdateTimestamp
-    private LocalDateTime fechaActualizacion;
-    
+    private LocalDateTime fecha_actualizacion;
+
     private Boolean estado = true;
 
     @ManyToOne

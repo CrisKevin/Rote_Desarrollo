@@ -1,5 +1,6 @@
 package com.uatf.sistema.dto;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
@@ -16,4 +17,5 @@ public class AsignaturaDTO {
     private LocalTime horas_asignadas;
     private UUID unidad_id;
     private String unidad_nombre;
+    private LocalDateTime fecha_creacion;
 }

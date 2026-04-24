@@ -9,7 +9,8 @@ public class GrupoMapper {
         return new GrupoDTO(
             entidad.getId(),
             entidad.getGrupo(),
-            entidad.getDescripcion()
+            entidad.getDescripcion(),
+            entidad.getFecha_creacion()
         );
     }
     

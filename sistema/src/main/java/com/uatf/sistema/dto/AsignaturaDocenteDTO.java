@@ -1,5 +1,6 @@
 package com.uatf.sistema.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -21,5 +22,5 @@ public class AsignaturaDocenteDTO {
     private String observacion_descripcion;
     private UUID periodo_id;
     private String periodo_descripcion;
-    
+    private LocalDateTime fecha_creacion;
 }
