@@ -317,12 +317,20 @@ const cerrarModalConfirmacion = () => {
       {/* Modal */}
       <ModalFormulario 
         abierto={modalAbierto}
-        grupoEditando={grupoEditando}
+        editando={grupoEditando !== null}
         formData={formData}
         onClose={cerrarModal}
         onSave={guardarGrupo}
         onInputChange={handleInputChange}
         error={errorFormulario}
+        titulo={{
+          nuevo: 'Nuevo Grupo',
+          editando: 'Editar Grupo'
+        }}
+        campos={[
+          { name: 'grupo', label: 'Número de Grupo', placeholder: 'Ej: 1, 2, 3...' },
+          { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del grupo' }
+        ]}
       />
     </div>
   );
