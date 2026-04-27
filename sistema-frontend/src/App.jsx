@@ -4,6 +4,7 @@ import DashboardLayout from './layout/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Groups from './pages/Groups';
 import TeachingPosition from './pages/TeachingPosition';
+import TipoCargo from './pages/TipoCargo';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import './App.css';
@@ -35,6 +36,14 @@ function App() {
             element={
               <DashboardLayout>
                 <TeachingPosition />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/tipo_cargo"
+            element={
+              <DashboardLayout>
+                <TipoCargo />
               </DashboardLayout>
             }
           />

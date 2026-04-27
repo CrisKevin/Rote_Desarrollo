@@ -1,61 +1,60 @@
-// src/pages/Groups.jsx
+// src/pages/DocenteCargo.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { grupoService } from '../services/grupoService';
+import { tipoCargoService } from '../services/tipoCargoService';
 import ModalFormulario from '../components/ModalFormulario';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 
-export default function Groups() {
-  const [grupos, setGrupos] = useState([]);
+export default function TipoCargo() {
+  const [items, setItems] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [grupoEditando, setGrupoEditando] = useState(null);
+  const [itemEditando, setItemEditando] = useState(null);
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
-  const [grupoAEliminar, setGrupoAEliminar] = useState(null);
+  const [itemAEliminar, setItemAEliminar] = useState(null);
   const [errorFormulario, setErrorFormulario] = useState('');
   
   const [formData, setFormData] = useState({
-    grupo: '',
-    descripcion: ''
+    tipoDocenteId: '',
+    cargoDocenteId: ''
   });
 
-  // useRef para saber si es la primera vez que se monta
   const isFirstRender = useRef(true);
 
-  // Función para cargar grupos
-  const cargarGrupos = async () => {
+  // Función para cargar cargos/docentes
+  const cargarItems = async () => {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = await grupoService.getAll();
+    const { data, error: errorMsg } = await tipoCargoService.getAll();
     
     if (data) {
       // Ordenar por fecha_creacion (más reciente primero)
-      const gruposOrdenados = [...data].sort((a, b) => {
+      const itemsOrdenados = [...data].sort((a, b) => {
         return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
       });
-      setGrupos(gruposOrdenados);
+      setItems(itemsOrdenados);
     } else {
-      setError(errorMsg || 'Error al cargar grupos');
+      setError(errorMsg || 'Error al cargar datos');
     }
     
     setCargando(false);
   };
 
   const abrirModalNuevo = () => {
-    setGrupoEditando(null);
-    setFormData({ grupo: '', descripcion: '' });
+    setItemEditando(null);
+    setFormData({ cargo: '', descripcion: '' });
     setErrorFormulario('');
     setModalAbierto(true);
   };
 
-  const abrirModalEditar = (grupo) => {
-    setGrupoEditando(grupo);
+  const abrirModalEditar = (item) => {
+    setItemEditando(item);
     setFormData({
-      grupo: grupo.grupo,
-      descripcion: grupo.descripcion
+      tipoDocenteId: item.tipo_docente_id || '',
+      cargoDocenteId: item.cargo_docente_id || ''
     });
     setErrorFormulario('');
     setModalAbierto(true);
@@ -63,20 +62,18 @@ export default function Groups() {
 
   const cerrarModal = () => {
     setModalAbierto(false);
-    setGrupoEditando(null);
-    setFormData({ grupo: '', descripcion: '' });
+    setItemEditando(null);
+    setFormData({ cargo: '', descripcion: '' });
     setErrorFormulario('');
   };
 
-  // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Guardar (crear o actualizar)
-  const guardarGrupo = async () => {
-    if (!formData.grupo.trim() || !formData.descripcion.trim()) {
+  const guardarItem = async () => {
+    if (!formData.tipoDocenteId || !formData.cargoDocenteId) {
       setErrorFormulario('Por favor completa todos los campos');
       return;
     }
@@ -84,75 +81,68 @@ export default function Groups() {
     setErrorFormulario('');
     setCargando(true);
     
-    if (grupoEditando) {
-    // Editar existente
-    const { error } = await grupoService.actualizar(grupoEditando.id, formData);
-    if (!error) {
-      await cargarGrupos();
-      cerrarModal();
+    if (itemEditando) {
+      const { error } = await tipoCargoService.actualizar(itemEditando.id, formData);
+      if (!error) {
+        await cargarItems();
+        cerrarModal();
+      } else {
+        setErrorFormulario('Error al actualizar: ' + error);
+      }
     } else {
-      setErrorFormulario('Error al actualizar: ' + error);
+      const { error } = await tipoCargoService.crear(formData);
+      if (!error) {
+        await cargarItems();
+        cerrarModal();
+      } else {
+        setErrorFormulario('Error al crear: ' + error);
+      }
     }
-  } else {
-    // Crear nuevo
-    const { error } = await grupoService.crear(formData);
-    if (!error) {
-      await cargarGrupos();
-      cerrarModal();
-    } else {
-      setErrorFormulario('Error al crear: ' + error);
-    }
-  }
     
     setCargando(false);
   };
 
-  // Eliminar grupo
-// Abrir modal de confirmación para eliminar
-const abrirModalEliminar = (grupo) => {
-  setGrupoAEliminar(grupo);
-  setModalConfirmacionAbierto(true);
-};
+  const abrirModalEliminar = (item) => {
+    setItemAEliminar(item);
+    setModalConfirmacionAbierto(true);
+  };
 
-// Ejecutar la eliminación
-const confirmarEliminar = async () => {
-  if (!grupoAEliminar) return;
-  
-  setModalConfirmacionAbierto(false);
-  setCargando(true);
-  
-  const { error } = await grupoService.eliminar(grupoAEliminar.id);
-  
-  if (!error) {
-    await cargarGrupos();
-  } else {
-    alert('Error al eliminar: ' + error);
-  }
-  
-  setCargando(false);
-  setGrupoAEliminar(null);
-};
+  const confirmarEliminar = async () => {
+    if (!itemAEliminar) return;
+    
+    setModalConfirmacionAbierto(false);
+    setCargando(true);
+    
+    const { error } = await tipoCargoService.eliminar(itemAEliminar.id);
+    
+    if (!error) {
+      await cargarItems();
+    } else {
+      alert('Error al eliminar: ' + error);
+    }
+    
+    setCargando(false);
+    setItemAEliminar(null);
+  };
 
-// Cerrar modal de confirmación
-const cerrarModalConfirmacion = () => {
-  setModalConfirmacionAbierto(false);
-  setGrupoAEliminar(null);
-};
+  const cerrarModalConfirmacion = () => {
+    setModalConfirmacionAbierto(false);
+    setItemAEliminar(null);
+  };
 
-  // useEffect
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      cargarGrupos();
+      cargarItems();
     }
   }, []);
 
-  // Filtrar grupos
-  const gruposFiltrados = grupos.filter((grupo) => {
+  // Filtrar items
+  const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
-      grupo.grupo.toLowerCase().includes(terminoBusqueda) ||
-      grupo.descripcion.toLowerCase().includes(terminoBusqueda)
+      item.tipo_docente_nombre.toLowerCase().includes(terminoBusqueda) ||
+      item.cargo_docente_nombre.toLowerCase().includes(terminoBusqueda)
     );
   });
 
@@ -163,10 +153,10 @@ const cerrarModalConfirmacion = () => {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Grupos
+              Tipos de Cargo
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Cargando grupos desde el servidor...
+              Cargando datos desde el servidor...
             </p>
           </div>
         </div>
@@ -185,7 +175,7 @@ const cerrarModalConfirmacion = () => {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Grupos
+              Docentes / Cargos
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Error al conectar con el servidor
@@ -195,7 +185,7 @@ const cerrarModalConfirmacion = () => {
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <p className="text-red-800 dark:text-red-400">❌ {error}</p>
           <button 
-            onClick={cargarGrupos}
+            onClick={cargarItems}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
             Reintentar
@@ -211,10 +201,10 @@ const cerrarModalConfirmacion = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Grupos
+            Cargo de Docente
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Gestiona todos los grupos del sistema
+            Gestiona todos los docentes y cargos del sistema
           </p>
         </div>
         <button 
@@ -222,7 +212,7 @@ const cerrarModalConfirmacion = () => {
           className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-5 h-5" />
-          Nuevo Grupo
+          Nuevo
         </button>
       </div>
 
@@ -232,7 +222,7 @@ const cerrarModalConfirmacion = () => {
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar por número de grupo o descripción..."
+            placeholder="Buscar por cargo o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
@@ -240,17 +230,17 @@ const cerrarModalConfirmacion = () => {
         </div>
       </div>
 
-      {/* Tabla de grupos */}
+      {/* Tabla */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Número de Grupo
+                  Tipo de Docente
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Descripción
+                  Cargo
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
                   Acciones
@@ -258,31 +248,31 @@ const cerrarModalConfirmacion = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-              {gruposFiltrados.map((grupo) => (
+              {itemsFiltrados.map((item) => (
                 <tr
-                  key={grupo.id}
+                  key={item.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    Grupo {grupo.grupo}
+                    {item.tipo_docente_nombre}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {grupo.descripcion}
+                    {item.cargo_docente_nombre}
                   </td>
                   <td className="px-6 py-4 text-sm text-center">
                     <div className="flex items-center gap-2 justify-center">
                       <button 
-                        onClick={() => abrirModalEditar(grupo)}
+                        onClick={() => abrirModalEditar(item)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
                       >
                         <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                       </button>
                       <button 
-  onClick={() => abrirModalEliminar(grupo)}
-  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
->
-  <Trash2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-</button>
+                        onClick={() => abrirModalEliminar(item)}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -291,47 +281,46 @@ const cerrarModalConfirmacion = () => {
           </table>
         </div>
         
-        {gruposFiltrados.length === 0 && (
+        {itemsFiltrados.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">
-              No se encontraron grupos
+              No se encontraron resultados
             </p>
           </div>
         )}
         
         <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Total: {grupos.length} grupos | Mostrando: {gruposFiltrados.length}
+            Total: {items.length} registros | Mostrando: {itemsFiltrados.length}
           </p>
         </div>
       </div>
 
       <ModalConfirmacion 
         abierto={modalConfirmacionAbierto}
-        titulo="Eliminar Grupo"
-        mensaje={`¿Estás seguro de eliminar el grupo "${grupoAEliminar ? `Grupo ${grupoAEliminar.grupo}` : ''}"? Esta acción no se puede deshacer.`}
+        titulo="Eliminar"
+        mensaje={`¿Estás seguro de eliminar la relación "${itemAEliminar ? `${itemAEliminar.tipo_docente_nombre} - ${itemAEliminar.cargo_docente_nombre}` : ''}"?`}
         onConfirmar={confirmarEliminar}
         onCancelar={cerrarModalConfirmacion}
       />
 
-      {/* Modal */}
-      <ModalFormulario 
+    <ModalFormulario 
         abierto={modalAbierto}
-        editando={grupoEditando !== null}
+        editando={itemEditando !== null}
         formData={formData}
         onClose={cerrarModal}
-        onSave={guardarGrupo}
+        onSave={guardarItem}
         onInputChange={handleInputChange}
         error={errorFormulario}
         titulo={{
-          nuevo: 'Nuevo Grupo',
-          editando: 'Editar Grupo'
+            nuevo: 'Nuevo Cargo de Docente',
+            editando: 'Editar Cargo de Docente'
         }}
         campos={[
-          { name: 'grupo', label: 'Número de Grupo', placeholder: 'Ej: 1, 2, 3...' },
-          { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del grupo' }
+            { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.' },
+            { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del cargo' }
         ]}
-      />
+    />
     </div>
   );
 }

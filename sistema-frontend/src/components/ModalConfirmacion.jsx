@@ -4,7 +4,10 @@ export default function ModalConfirmacion({
   titulo, 
   mensaje, 
   onConfirmar, 
-  onCancelar 
+  onCancelar,
+  textoConfirmar = 'Eliminar',
+  textoCancelar = 'Cancelar',   
+  colorConfirmar = 'bg-indigo-600',  
 }) {
   if (!abierto) return null;
 
@@ -24,13 +27,13 @@ export default function ModalConfirmacion({
             onClick={onCancelar}
             className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
           >
-            Cancelar
+            {textoCancelar}
           </button>
           <button
             onClick={onConfirmar}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className={`px-4 py-2 ${colorConfirmar} text-white rounded-lg hover:${colorConfirmar.replace('600', '700')} transition-colors`}
           >
-            Eliminar
+            {textoConfirmar}
           </button>
         </div>
       </div>

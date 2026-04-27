@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
+import { 
   LayoutDashboard,
   Users,
   GraduationCap,
+  Tags,
   BarChart3,
   Settings,
   Menu,
@@ -32,6 +33,12 @@ export default function Sidebar() {
       label: 'Cargo de Docente',
       icon: GraduationCap,
       path: '/docente_cargo',
+    },
+    {
+      id: 'tipo-cargo',
+      label: 'Tipo de Cargo',
+      icon: Tags, 
+      path: '/tipo_cargo'
     },
     {
       id: 'reports',
