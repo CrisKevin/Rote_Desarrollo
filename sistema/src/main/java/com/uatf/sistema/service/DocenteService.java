@@ -79,9 +79,10 @@ public class DocenteService {
         Unidad unidad = unidad_repo.findById(dto.getUnidad_id())
             .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
 
-        docente.setNombre(dto.getNombre());
+        docente.setNombres(dto.getNombres());
         docente.setApellidos(dto.getApellidos());
         docente.setObservaciones(dto.getObservaciones());
+        docente.setDedicacion(dto.getDedicacion());
         docente.setCi(dto.getCi());
         docente.setCargo_tipo(cargoTipo);
         docente.setUnidad(unidad);

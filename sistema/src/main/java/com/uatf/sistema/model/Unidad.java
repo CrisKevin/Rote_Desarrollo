@@ -56,4 +56,7 @@ public class Unidad {
 
     @OneToMany(mappedBy = "unidad")
     private List<Docente> docentes;
+
+    @OneToMany(mappedBy = "unidad")
+    private List<AsignaturaDocente> unidades_asingadas;
 }

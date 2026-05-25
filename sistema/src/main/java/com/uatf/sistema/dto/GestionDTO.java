@@ -14,5 +14,6 @@ public class GestionDTO {
     private String gestion;
     private String descripcion;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
 }

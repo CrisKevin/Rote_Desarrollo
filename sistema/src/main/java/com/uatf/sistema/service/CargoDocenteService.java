@@ -55,7 +55,7 @@ public class CargoDocenteService {
         cargoDocente.setCargo(dto.getCargo());
         cargoDocente.setDescripcion(dto.getDescripcion());
 
-        return CargoDocenteMapper.toDTO(cargoDocente);
+        return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
     }
 
     public void delete(UUID id){

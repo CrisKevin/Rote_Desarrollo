@@ -1,9 +1,15 @@
-// src/pages/DocenteCargo.jsx
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+// src/pages/TipoCargo.jsx
+import { Search, Trash2, Plus } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { tipoCargoService } from '../services/tipoCargoService';
+import { teachingPositionService } from '../services/teachingPositionService';
+import { tipoDocenteService } from '../services/tipoDocenteService';
 import ModalFormulario from '../components/ModalFormulario';
 import ModalConfirmacion from '../components/ModalConfirmacion';
+
+// IDs CONSTANTES fuera del componente
+const ORDINARIO_TITULAR_ID = '3e2ed7b6-7306-4726-a770-86a6f4f0d35e';
+const ASISTENTE_AI_ID = '2cdd67e6-6b1a-4b74-adef-411ea0bb8222';
 
 export default function TipoCargo() {
   const [items, setItems] = useState([]);
@@ -15,15 +21,38 @@ export default function TipoCargo() {
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [errorFormulario, setErrorFormulario] = useState('');
-  
+  const [tiposDocente, setTiposDocente] = useState([]);
+  const [cargosDocente, setCargosDocente] = useState([]);
+  const [cargosFiltrados, setCargosFiltrados] = useState([]);
+
   const [formData, setFormData] = useState({
-    tipoDocenteId: '',
-    cargoDocenteId: ''
+    tipo_docente_id: '',
+    cargo_docente_id: ''
   });
 
   const isFirstRender = useRef(true);
 
-  // Función para cargar cargos/docentes
+  // Función para actualizar los cargos según el tipo seleccionado
+  const actualizarCargosFiltrados = (tipoDocenteId, cargoActual = '') => {
+    if (!tipoDocenteId || cargosDocente.length === 0) {
+      setCargosFiltrados(cargosDocente);
+      return;
+    }
+    
+    if (tipoDocenteId === ORDINARIO_TITULAR_ID) {
+      setCargosFiltrados(cargosDocente);
+    } else {
+      const cargoFiltrado = cargosDocente.filter(cargo => cargo.id === ASISTENTE_AI_ID);
+      setCargosFiltrados(cargoFiltrado);
+      
+      // Si el cargo seleccionado no es el válido, limpiarlo
+      if (cargoActual && cargoActual !== ASISTENTE_AI_ID) {
+        setFormData(prev => ({ ...prev, cargo_docente_id: '' }));
+      }
+    }
+  };
+
+  // Función para cargar relaciones
   const cargarItems = async () => {
     setCargando(true);
     setError('');
@@ -31,7 +60,6 @@ export default function TipoCargo() {
     const { data, error: errorMsg } = await tipoCargoService.getAll();
     
     if (data) {
-      // Ordenar por fecha_creacion (más reciente primero)
       const itemsOrdenados = [...data].sort((a, b) => {
         return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
       });
@@ -45,35 +73,72 @@ export default function TipoCargo() {
 
   const abrirModalNuevo = () => {
     setItemEditando(null);
-    setFormData({ cargo: '', descripcion: '' });
-    setErrorFormulario('');
-    setModalAbierto(true);
-  };
-
-  const abrirModalEditar = (item) => {
-    setItemEditando(item);
-    setFormData({
-      tipoDocenteId: item.tipo_docente_id || '',
-      cargoDocenteId: item.cargo_docente_id || ''
+    setFormData({ 
+      tipo_docente_id: '',
+      cargo_docente_id: '' 
     });
     setErrorFormulario('');
+    // Mostrar todos los cargos cuando se abre el modal (sin selección)
+    setCargosFiltrados(cargosDocente);
     setModalAbierto(true);
   };
 
   const cerrarModal = () => {
     setModalAbierto(false);
     setItemEditando(null);
-    setFormData({ cargo: '', descripcion: '' });
+    setFormData({ 
+      tipo_docente_id: '', 
+      cargo_docente_id: '' 
+    });
     setErrorFormulario('');
+  };
+
+  const cargarTiposDocente = async () => {
+    try {
+      const { data } = await tipoDocenteService.getAll();
+      if (data) {
+        const tiposOrdenados = [...data].sort((a, b) => {
+          return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+        });
+        setTiposDocente(tiposOrdenados);
+      }
+    } catch (error) {
+      console.error('Error cargando tipos docente:', error);
+    }
+  };
+
+  const cargarCargosDocente = async () => {
+    try {
+      const { data } = await teachingPositionService.getAll();
+      if (data) {
+        const cargosOrdenados = [...data].sort((a, b) => {
+          return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+        });
+        setCargosDocente(cargosOrdenados);
+        setCargosFiltrados(cargosOrdenados); // Mostrar todos al inicio
+      }
+    } catch (error) {
+      console.error('Error cargando cargos docente:', error);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === 'tipo_docente_id') {
+      // Actualizar tipo y limpiar cargo
+      setFormData({ 
+        tipo_docente_id: value, 
+        cargo_docente_id: '' 
+      });
+      // Actualizar los cargos disponibles según el tipo seleccionado
+      actualizarCargosFiltrados(value, '');
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const guardarItem = async () => {
-    if (!formData.tipoDocenteId || !formData.cargoDocenteId) {
+    if (!formData.tipo_docente_id || !formData.cargo_docente_id) {
       setErrorFormulario('Por favor completa todos los campos');
       return;
     }
@@ -130,10 +195,13 @@ export default function TipoCargo() {
     setItemAEliminar(null);
   };
 
+  // SOLO un useEffect para la carga inicial
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       cargarItems();
+      cargarTiposDocente();
+      cargarCargosDocente();
     }
   }, []);
 
@@ -141,8 +209,8 @@ export default function TipoCargo() {
   const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
-      item.tipo_docente_nombre.toLowerCase().includes(terminoBusqueda) ||
-      item.cargo_docente_nombre.toLowerCase().includes(terminoBusqueda)
+      item.tipo_docente_nombre?.toLowerCase().includes(terminoBusqueda) ||
+      item.cargo_docente_nombre?.toLowerCase().includes(terminoBusqueda)
     );
   });
 
@@ -153,7 +221,7 @@ export default function TipoCargo() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Tipos de Cargo
+              Tipo de Cargo
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Cargando datos desde el servidor...
@@ -175,7 +243,7 @@ export default function TipoCargo() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Docentes / Cargos
+              Tipo de Cargo
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Error al conectar con el servidor
@@ -201,7 +269,7 @@ export default function TipoCargo() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Cargo de Docente
+            Tipo de Cargo
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Gestiona todos los docentes y cargos del sistema
@@ -222,7 +290,7 @@ export default function TipoCargo() {
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar por cargo o descripción..."
+            placeholder="Buscar por tipo de docente o cargo..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
@@ -243,6 +311,9 @@ export default function TipoCargo() {
                   Cargo
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  Fecha de Creación
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
                   Acciones
                 </th>
               </tr>
@@ -259,14 +330,11 @@ export default function TipoCargo() {
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {item.cargo_docente_nombre}
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+                    {new Date(item.fecha_creacion).toLocaleString()}
+                  </td>
                   <td className="px-6 py-4 text-sm text-center">
                     <div className="flex items-center gap-2 justify-center">
-                      <button 
-                        onClick={() => abrirModalEditar(item)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                      >
-                        <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </button>
                       <button 
                         onClick={() => abrirModalEliminar(item)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
@@ -304,7 +372,7 @@ export default function TipoCargo() {
         onCancelar={cerrarModalConfirmacion}
       />
 
-    <ModalFormulario 
+      <ModalFormulario 
         abierto={modalAbierto}
         editando={itemEditando !== null}
         formData={formData}
@@ -313,14 +381,30 @@ export default function TipoCargo() {
         onInputChange={handleInputChange}
         error={errorFormulario}
         titulo={{
-            nuevo: 'Nuevo Cargo de Docente',
-            editando: 'Editar Cargo de Docente'
+          nuevo: 'Nueva Relación Tipo de Cargo',
+          editando: 'Editar Relación Tipo de Cargo'
         }}
         campos={[
-            { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.' },
-            { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del cargo' }
+          { 
+            name: 'tipo_docente_id', 
+            label: 'Tipo de Docente', 
+            type: 'select',
+            options: tiposDocente,
+            optionLabel: 'tipo',
+            optionValue: 'id',
+            placeholder: 'Seleccione un tipo de docente'
+          },
+          { 
+            name: 'cargo_docente_id', 
+            label: 'Cargo', 
+            type: 'select',
+            options: cargosFiltrados,
+            optionLabel: 'cargo',
+            optionValue: 'id',
+            placeholder: 'Seleccione un cargo'
+          }
         ]}
-    />
+      />
     </div>
   );
 }

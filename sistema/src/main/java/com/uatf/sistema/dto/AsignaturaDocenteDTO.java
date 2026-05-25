@@ -22,5 +22,9 @@ public class AsignaturaDocenteDTO {
     private String observacion_descripcion;
     private UUID periodo_id;
     private String periodo_descripcion;
+    private UUID unidad_id;
+    private String unidad_nombre;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
+
 }

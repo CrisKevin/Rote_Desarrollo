@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>PLANILLAS</title>
+    <style>
+        @page { 
+            size: landscape;
+            margin: 25mm 15mm 20mm 15mm;
+        }
+        
+        /* Header y Footer running */
+        @page {
+            margin: 35mm 15mm 25mm 15mm;
+            @top-center {
+                content: element(header);
+            }
+            @bottom-center {
+                content: element(footer);
+            }
+        }
+        
+        #header {
+            position: running(header);
+            width: 100%;
+            margin-top: 5mm;
+        }
+        #footer {
+            position: running(footer);
+            text-align: center;
+        }
+        
+        body { 
+            font-family: 'DejaVu Sans', Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            -fs-table-paginate: paginate;
+        }
+        /* Encabezado de la universidad */
+        .uni-header {
+            display: inline-block; 
+            text-align: center;   
+            font-size: 12px;
+        }
+        .uni-header p {
+            margin: 2px 0;
+        }
+        /* Título principal */
+        .titulo-principal {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        /* Fila de información (Gestión, Semestre, etc.) */
+        .info-fila {
+            width: 100%;
+            margin-bottom: 10px;
+            border: none;
+            font-size: 10px;
+        }
+        .info-fila td {
+            width: 16.66%;
+            border: none;
+            padding: 2px 0;
+        }
+        .text-left { text-align: center; }
+        .text-right { text-align: center; }
+        
+        /* Tabla principal */
+        .tabla-principal { 
+            width: 100%; 
+            border-collapse: collapse;
+            font-size: 10px; 
+        }
+        .tabla-principal thead {
+            display: table-header-group;
+        }
+        .tabla-principal tbody {
+            display: table-row-group;
+        }
+        .tabla-principal th, .tabla-principal td { 
+            border: 1px solid #000; 
+            padding: 4px 4px; 
+            text-align: left; 
+            vertical-align: top; 
+        }
+        .tabla-principal th { 
+            background-color: #cccbcb; 
+            color: rgb(0, 0, 0); 
+            text-align: center; 
+            font-weight: bold;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        .docente-group {
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER (se repite en cada página) -->
+    <div id="header">
+        <div class="uni-header">
+            <p>UNIVERSIDAD AUTÓNOMA "TOMÁS FRÍAS"</p>
+            <p>DEPARTAMENTO DE PERSONAL</p>
+            <p>POTOSÍ - BOLIVIA</p>
+        </div>
+        
+        <div class="titulo-principal">
+            PLANILLA DE COSTOS CORRESPONDIENTES AL MES DE <span th:text="${mes}"></span> DE <span th:text="${anio}"></span>
+        </div>
+        
+        <table class="info-fila">
+            <tbody>
+                <tr>
+                    <td class="text-left"><strong>Gestión Académica:</strong> <span th:text="${bloque.gestion}">-</span></td>
+                    <td class="text-right"><strong>Periodo:</strong> <span th:text="${bloque.periodo}">-</span></td>
+                    <td class="text-right"><strong>Unidad:</strong> <span th:text="${bloque.unidad}">Carrera de Ingenieria</span></td>
+                    <td class="text-left"><strong>Repartición:</strong> <span th:text="${bloque.reparticion}">-</span></td>
+                    <td class="text-right"><strong>Items:</strong> <span th:text="${bloque.items}">-</span></td>
+                    <td class="text-right"><strong>Potosí,</strong> <span th:text="${fechaFormateada}">-</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FOOTER (se repite en cada página) -->
+    <div id="footer">
+        <table style="width: 100%; border: none;">
+            <tbody>
+                <tr>
+                    <td style="width: 33%; border: none; font-size: 10px; text-align: center;">SECRETARIA</td>
+                    <td style="width: 34%; border: none; font-size: 10px; text-align: center;">DIRECTOR DE CARRERA</td>
+                    <td style="width: 33%; border: none; font-size: 10px; text-align: center;">DECANO</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="content">
+        <!-- TABLA PRINCIPAL -->
+        <table class="tabla-principal">
+            <thead>
+                <tr>
+                    <th style="width: 10%">CI</th>
+                    <th style="width: 20%">Docente</th>
+                    <th style="width: 14%">Cargo</th>
+                    <th style="width: 8%">Dedicación</th>
+                    <th style="width: 6%">Grupo</th>
+                    <th style="width: 10%">Sigla</th>
+                    <th style="width: 6%">Horas</th>
+                    <th style="width: 8%">Total Horas</th>
+                    <th style="width: 18%">Observación</th>
+                </tr>
+            </thead>
+            
+            <th:block th:each="docenteEntry : ${bloque.reportesPorDocente}">
+                
+                <tbody class="docente-group"
+                    th:with="docenteNombre=${docenteEntry.key}, 
+                                lista=${docenteEntry.value}, 
+                                horasTotal=${bloque.totalHorasPorDocente.get(docenteEntry.key)}">
+                    
+                    <tr th:each="asignacion, iterStat : ${lista}">
+                        
+                        <td th:if="${iterStat.index == 0}" 
+                            th:attr="rowspan=${lista.size()}"
+                            style="text-align: center; vertical-align: middle;" 
+                            th:text="${asignacion.docenteCi}">-</td>
+
+                        <td th:if="${iterStat.index == 0}" 
+                            th:attr="rowspan=${lista.size()}"
+                            style="text-align: center; vertical-align: middle;"
+                            th:text="${docenteNombre}">-</td>
+
+                        <td th:if="${iterStat.index == 0}" 
+                            th:attr="rowspan=${lista.size()}"
+                            style="text-align: center; vertical-align: middle;"
+                            th:text="${asignacion.cargo}">-</td>
+
+                        <td th:if="${iterStat.index == 0}" 
+                            th:attr="rowspan=${lista.size()}"
+                            style="text-align: center; vertical-align: middle;"  
+                            th:text="${asignacion.dedicacion}">-</td>
+                        
+                        <td style="text-align: center; vertical-align: middle;" th:text="${asignacion.grupoNombre}">-</td>
+                        <td style="text-align: center; vertical-align: middle;" th:text="${asignacion.asignaturaSigla}">-</td>
+                        <td style="text-align: center; vertical-align: middle;" th:text="${asignacion.horas}">-</td>
+
+                        <td th:if="${iterStat.index == 0}" 
+                            th:attr="rowspan=${lista.size()}"
+                            style="text-align: center; vertical-align: middle;"
+                            th:text="${horasTotal}">-</td>
+                        <td th:text="${asignacion.observacionDescripcion} ?: '-'">-</td>
+                    </tr>
+                </tbody>
+            </th:block>
+        </table>
+    </div>
+</body>
+</html> 

@@ -49,8 +49,6 @@ public class UnidadService {
         Unidad dependiente = null;
 
         if(dto.getDependiente_id() != null){
-            System.out.println("xaskjdasdsakjndjasndjkasndjkasndjkabdhadbjsakdbahjsdbasjkbdkajhbshdbjdbasjdbajshbdasjhdbasjkdbd");
-            System.out.println(dto.getDependiente_id());
             dependiente = repo.findById(dto.getDependiente_id())
             .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
         }

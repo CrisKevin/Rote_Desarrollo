@@ -1,57 +1,123 @@
+// src/services/api.js
 const API_URL = 'http://localhost:8080/api';
 
 console.log('🔧 API Configurada con URL:', API_URL);
 
-// Función para manejar las peticiones
+// Función para obtener el token del localStorage
+const getToken = () => {
+  return localStorage.getItem('token');
+};
+
+// Función para obtener headers con autenticación
+const getHeaders = (customHeaders = {}, isBlob = false) => {
+  const token = getToken();
+  const headers = {
+    ...customHeaders
+  };
+  
+  // Si no es blob, agregamos Content-Type
+  if (!isBlob) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Si hay token, lo agregamos al header
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
+
+// Función para manejar respuestas no autorizadas
+const handleUnauthorized = (status) => {
+  if (status === 401 || status === 403) {
+    console.log('🔒 Sesión expirada o no autorizada');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // Disparar un evento personalizado
+    window.dispatchEvent(new CustomEvent('auth:logout'));
+    
+    window.location.href = '/login';
+    return true;
+  }
+  return false;
+};
+
 const api = {
-  // GET - Para obtener datos
-  get: async (endpoint) => {
+  get: async (endpoint, options = {}) => {
     const url = `${API_URL}${endpoint}`;
     console.log(`📤 GET: ${url}`);
     
     try {
-      const response = await fetch(url);
-      console.log(`📥 Response status: ${response.status} ${response.statusText}`);
-      console.log(`📥 Response headers:`, response.headers);
+      const isBlob = options.responseType === 'blob';
+      const headers = getHeaders(options.headers, isBlob);
+      
+      const fetchOptions = {
+        method: 'GET',
+        headers: headers,
+        ...options
+      };
+      
+      // Eliminar responseType de fetchOptions porque no es válido para fetch
+      delete fetchOptions.responseType;
+      
+      const response = await fetch(url, fetchOptions);
+      console.log(`📥 Response status: ${response.status}`);
+      
+      // Verificar si la respuesta es 401 o 403 (no autorizado)
+      if (handleUnauthorized(response.status)) {
+        return { data: null, error: 'No autorizado' };
+      }
+      
+      // Verificar si la respuesta es un PDF o blob
+      const contentType = response.headers.get('content-type');
+      
+      if (options.responseType === 'blob' || (contentType && contentType.includes('application/pdf'))) {
+        const blob = await response.blob();
+        return { data: blob, error: null, status: response.status };
+      }
       
       if (!response.ok) {
-        console.error(`❌ Error HTTP: ${response.status}`);
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`✅ Data recibida:`, data);
       return { data, error: null };
     } catch (error) {
       console.error(`❌ Error en GET:`, error);
-      console.error(`❌ Tipo de error: ${error.name}`);
-      console.error(`❌ Mensaje: ${error.message}`);
       return { data: null, error: error.message };
     }
   },
   
-  // POST - Para crear datos
-  post: async (endpoint, body) => {
+  post: async (endpoint, body, options = {}) => {
     const url = `${API_URL}${endpoint}`;
     console.log(`📤 POST: ${url}`, body);
     
     try {
+      const headers = getHeaders(options.headers);
+      
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
+        headers: headers,
+        body: JSON.stringify(body),
+        ...options
       });
       
       console.log(`📥 Response status: ${response.status}`);
       
+      // Verificar si la respuesta es 401 o 403 (no autorizado)
+      if (handleUnauthorized(response.status)) {
+        return { data: null, error: 'No autorizado' };
+      }
+      
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`✅ Data recibida:`, data);
       return { data, error: null };
     } catch (error) {
       console.error(`❌ Error en POST:`, error);
@@ -59,28 +125,33 @@ const api = {
     }
   },
   
-  // 👇 NUEVO: PUT - Para actualizar datos
-  put: async (endpoint, body) => {
+  put: async (endpoint, body, options = {}) => {
     const url = `${API_URL}${endpoint}`;
     console.log(`📤 PUT: ${url}`, body);
     
     try {
+      const headers = getHeaders(options.headers);
+      
       const response = await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
+        headers: headers,
+        body: JSON.stringify(body),
+        ...options
       });
       
       console.log(`📥 Response status: ${response.status}`);
       
+      // Verificar si la respuesta es 401 o 403 (no autorizado)
+      if (handleUnauthorized(response.status)) {
+        return { data: null, error: 'No autorizado' };
+      }
+      
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`✅ Data recibida:`, data);
       return { data, error: null };
     } catch (error) {
       console.error(`❌ Error en PUT:`, error);
@@ -88,32 +159,36 @@ const api = {
     }
   },
   
-  // 👇 NUEVO: DELETE - Para eliminar datos
-  delete: async (endpoint) => {
+  delete: async (endpoint, options = {}) => {
     const url = `${API_URL}${endpoint}`;
     console.log(`📤 DELETE: ${url}`);
     
     try {
+      const headers = getHeaders(options.headers);
+      
       const response = await fetch(url, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: headers,
+        ...options
       });
       
       console.log(`📥 Response status: ${response.status}`);
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      // Verificar si la respuesta es 401 o 403 (no autorizado)
+      if (handleUnauthorized(response.status)) {
+        return { data: null, error: 'No autorizado' };
       }
       
-      // DELETE puede no devolver datos, pero si devuelve algo lo parseamos
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}: ${response.statusText}`);
+      }
+      
       let data = null;
       try {
         data = await response.json();
-        console.log(`✅ Data recibida:`, data);
       } catch (e) {
-        console.log(`✅ Eliminado exitosamente (sin respuesta) #${e.message}`);
+        console.log(`✅ Eliminado exitosamente ${e}`);
       }
       
       return { data, error: null };

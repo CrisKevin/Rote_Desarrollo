@@ -10,7 +10,8 @@ public class CargoDocenteMapper {
             entidad.getId(), 
             entidad.getCargo(),
             entidad.getDescripcion(),
-            entidad.getFecha_creacion()
+            entidad.getFecha_creacion(),
+            entidad.getFecha_actualizacion()
         );
     }
 

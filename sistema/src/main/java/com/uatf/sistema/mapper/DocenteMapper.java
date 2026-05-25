@@ -8,21 +8,25 @@ public class DocenteMapper {
     public static DocenteDTO toDTO(Docente entidad){
         return new DocenteDTO(
             entidad.getId(),
-            entidad.getNombre(),
+            entidad.getNombres(),
             entidad.getApellidos(), 
             entidad.getCi(), 
             entidad.getObservaciones(),
+            entidad.getDedicacion(),
             entidad.getCargo_tipo().getId(),
+            entidad.getCargo_tipo().getTipo_docente().getTipo(),
+            entidad.getCargo_tipo().getCargo_docente().getCargo(),
             entidad.getUnidad().getId(),
             entidad.getUnidad().getNombre(),
-            entidad.getFecha_creacion()
+            entidad.getFecha_creacion(),
+            entidad.getFecha_actualizacion()
         );
     }
 
     public static Docente toEntity(DocenteDTO dto){
         Docente entidad = new Docente();
         entidad.setId(dto.getId());
-        entidad.setNombre(dto.getNombre());
+        entidad.setNombres(dto.getNombres());
         entidad.setApellidos(dto.getApellidos());
         entidad.setCi(dto.getCi());
         entidad.setObservaciones(dto.getObservaciones());

@@ -28,13 +28,15 @@ public class Docente {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String nombre;
+    private String nombres;
 
     private String apellidos;
 
     private String ci;
 
     private String observaciones;
+
+    private String dedicacion;
 
     @CreationTimestamp
     private LocalDateTime fecha_creacion;

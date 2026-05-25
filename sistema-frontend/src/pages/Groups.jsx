@@ -241,70 +241,82 @@ const cerrarModalConfirmacion = () => {
       </div>
 
       {/* Tabla de grupos */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Número de Grupo
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Descripción
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-              {gruposFiltrados.map((grupo) => (
-                <tr
-                  key={grupo.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+<div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <tr>
+          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+            Número de Grupo
+          </th>
+          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+            Descripción
+          </th>
+          <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+            Fecha de Creación
+          </th>
+          <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+            Fecha de Actualización
+          </th>
+          <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+            Acciones
+          </th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+        {gruposFiltrados.map((grupo) => (
+          <tr
+            key={grupo.id}
+            className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+              Grupo {grupo.grupo}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+              {grupo.descripcion}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+              {new Date(grupo.fecha_creacion).toLocaleString()}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+              {new Date(grupo.fecha_actualizacion).toLocaleString()}
+            </td>
+            <td className="px-6 py-4 text-sm text-center">
+              <div className="flex items-center gap-2 justify-center">
+                <button 
+                  onClick={() => abrirModalEditar(grupo)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
                 >
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    Grupo {grupo.grupo}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {grupo.descripcion}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-center">
-                    <div className="flex items-center gap-2 justify-center">
-                      <button 
-                        onClick={() => abrirModalEditar(grupo)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                      >
-                        <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </button>
-                      <button 
-  onClick={() => abrirModalEliminar(grupo)}
-  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
->
-  <Trash2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {gruposFiltrados.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
-              No se encontraron grupos
-            </p>
-          </div>
-        )}
-        
-        <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-800">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Total: {grupos.length} grupos | Mostrando: {gruposFiltrados.length}
-          </p>
-        </div>
-      </div>
+                  <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+                <button 
+                  onClick={() => abrirModalEliminar(grupo)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                >
+                  <Trash2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  
+  {gruposFiltrados.length === 0 && (
+    <div className="text-center py-12">
+      <p className="text-gray-500 dark:text-gray-400">
+        No se encontraron grupos
+      </p>
+    </div>
+  )}
+  
+  <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-800">
+    <p className="text-sm text-gray-500 dark:text-gray-400">
+      Total: {grupos.length} grupos | Mostrando: {gruposFiltrados.length}
+    </p>
+  </div>
+</div>
 
       <ModalConfirmacion 
         abierto={modalConfirmacionAbierto}

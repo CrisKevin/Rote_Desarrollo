@@ -35,6 +35,10 @@ public class AsignaturaDocente {
     private Boolean estado = true;
 
     @ManyToOne
+    @JoinColumn(name = "unidad_id", referencedColumnName = "id")
+    private Unidad unidad;
+
+    @ManyToOne
     @JoinColumn(name = "grupo_id",referencedColumnName = "id")
     private Grupo grupo;
 
@@ -47,7 +51,7 @@ public class AsignaturaDocente {
     private Asignatura asignatura;
 
     @ManyToOne
-    @JoinColumn(name = "observacion_id", referencedColumnName = "id")
+    @JoinColumn(name = "observacion_id", referencedColumnName = "id", nullable = true)
     private Observacion observacion;
 
     @ManyToOne

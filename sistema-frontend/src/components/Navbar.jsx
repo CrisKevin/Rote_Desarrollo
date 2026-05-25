@@ -1,10 +1,29 @@
 import { useState } from 'react';
 import { ChevronDown, LogOut, Lock, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { isDark, toggleDarkMode } = useTheme();
+  const navigate = useNavigate();
+  
+  // Obtener el usuario actual del localStorage
+  const currentUser = authService.getCurrentUser();
+  const userName = currentUser?.username || 'Admin';
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
+
+  const handleChangePassword = () => {
+    // Aquí puedes navegar a la página de cambio de contraseña
+    // navigate('/cambiar-contrasena');
+    console.log('Cambiar contraseña');
+  };
 
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-30">
@@ -37,11 +56,11 @@ export default function Navbar() {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
-                A
+              <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {userInitial}
               </div>
               <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
-                Admin
+                {userName}
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform ${
@@ -52,8 +71,11 @@ export default function Navbar() {
 
             {/* Dropdown menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-2">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-2 z-50">
+                <button
+                  onClick={handleChangePassword}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                >
                   <Lock className="w-4 h-4" />
                   Cambiar contraseña
                 </button>
@@ -74,7 +96,10 @@ export default function Navbar() {
                   )}
                 </button>
                 <hr className="border-gray-200 dark:border-gray-800 my-2" />
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors">
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                >
                   <LogOut className="w-4 h-4" />
                   Cerrar sesión
                 </button>

@@ -153,7 +153,7 @@ export default function TeachingPosition() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Docentes / Cargos
+              Cargo de Docente
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Cargando datos desde el servidor...
@@ -175,7 +175,7 @@ export default function TeachingPosition() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Docentes / Cargos
+              Cargo de Docente
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Error al conectar con el servidor
@@ -243,6 +243,12 @@ export default function TeachingPosition() {
                   Descripción
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  Fecha de Creación
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                  Fecha de Actualización
+                </th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
                   Acciones
                 </th>
               </tr>
@@ -259,6 +265,12 @@ export default function TeachingPosition() {
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {item.descripcion}
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+                    {new Date(item.fecha_creacion).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+                    {new Date(item.fecha_actualizacion).toLocaleString()}
+                  </td>
                   <td className="px-6 py-4 text-sm text-center">
                     <div className="flex items-center gap-2 justify-center">
                       <button 
@@ -274,8 +286,8 @@ export default function TeachingPosition() {
                         <Trash2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                       </button>
                     </div>
-                  </td>
-                </tr>
+                   </td>
+                 </tr>
               ))}
             </tbody>
           </table>
@@ -304,7 +316,7 @@ export default function TeachingPosition() {
         onCancelar={cerrarModalConfirmacion}
       />
 
-    <ModalFormulario 
+      <ModalFormulario 
         abierto={modalAbierto}
         editando={itemEditando !== null}
         formData={formData}
@@ -313,14 +325,14 @@ export default function TeachingPosition() {
         onInputChange={handleInputChange}
         error={errorFormulario}
         titulo={{
-            nuevo: 'Nuevo Cargo de Docente',
-            editando: 'Editar Cargo de Docente'
+          nuevo: 'Nuevo Cargo de Docente',
+          editando: 'Editar Cargo de Docente'
         }}
         campos={[
-            { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.' },
-            { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del cargo' }
+          { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.' },
+          { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del cargo' }
         ]}
-    />
+      />
     </div>
   );
 }

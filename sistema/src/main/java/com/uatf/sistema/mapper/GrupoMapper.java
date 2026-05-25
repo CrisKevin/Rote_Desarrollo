@@ -10,7 +10,8 @@ public class GrupoMapper {
             entidad.getId(),
             entidad.getGrupo(),
             entidad.getDescripcion(),
-            entidad.getFecha_creacion()
+            entidad.getFecha_creacion(),
+            entidad.getFecha_actualizacion()
         );
     }
     

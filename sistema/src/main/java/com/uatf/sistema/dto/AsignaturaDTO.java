@@ -18,4 +18,5 @@ public class AsignaturaDTO {
     private UUID unidad_id;
     private String unidad_nombre;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 }

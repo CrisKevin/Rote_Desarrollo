@@ -11,16 +11,19 @@ public class AsignaturaDocenteMapper {
                 entidad.getGrupo().getId(),
                 entidad.getGrupo().getGrupo(),
                 entidad.getDocente().getId(),
-                entidad.getDocente().getNombre(),
+                entidad.getDocente().getNombres(),
                 entidad.getDocente().getApellidos(),
                 entidad.getAsignatura().getId(),
                 entidad.getAsignatura().getNombre(),
-                entidad.getObservacion().getId(),
-                entidad.getObservacion().getDescripcion(),
+                entidad.getObservacion() != null ? entidad.getObservacion().getId() : null,
+                entidad.getObservacion() != null ? entidad.getObservacion().getDescripcion() : null,
                 entidad.getPeriodo().getId(),
                 entidad.getPeriodo().getDescripcion(),
-                entidad.getFecha_creacion()
-                
+                entidad.getUnidad().getId(),
+                entidad.getUnidad().getNombre(),
+                entidad.getFecha_creacion(),
+                entidad.getFecha_actualizacion()
+
         );
     }
 

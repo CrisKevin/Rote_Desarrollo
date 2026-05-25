@@ -11,7 +11,8 @@ public class ObservacionMapper {
             entidad.getDescripcion(), 
             entidad.getDesde(),
             entidad.getHasta(),
-            entidad.getFecha_creacion()
+            entidad.getFecha_creacion(),
+            entidad.getFecha_actualizacion()
         );
     }
 

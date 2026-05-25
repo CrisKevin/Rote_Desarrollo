@@ -16,5 +16,6 @@ public class CargoTipoDTO {
     private UUID cargo_docente_id;
     private String cargo_docente_nombre;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
     
 }

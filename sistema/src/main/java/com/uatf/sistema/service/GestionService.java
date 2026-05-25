@@ -56,6 +56,9 @@ public class GestionService {
         Gestion gestion = repo.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Gestion no encontrada"));
 
+        gestion.setGestion(dto.getGestion());
+        gestion.setDescripcion(dto.getDescripcion());
+
         return GestionMapper.toDTO(repo.save(gestion));
     }
 

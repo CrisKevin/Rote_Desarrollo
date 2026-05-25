@@ -10,7 +10,8 @@ public class GestionMapper {
             entidad.getId(), 
             entidad.getGestion(), 
             entidad.getDescripcion(),
-            entidad.getFecha_creacion()
+            entidad.getFecha_creacion(),
+            entidad.getFecha_actualizacion()
         );
     }
 

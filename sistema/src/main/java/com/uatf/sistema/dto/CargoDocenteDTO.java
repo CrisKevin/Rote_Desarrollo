@@ -14,5 +14,6 @@ public class CargoDocenteDTO {
     private String cargo;
     private String descripcion;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
 }

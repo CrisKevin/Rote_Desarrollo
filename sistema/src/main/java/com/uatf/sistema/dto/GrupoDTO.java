@@ -13,4 +13,5 @@ public class GrupoDTO {
     private String grupo;
     private String descripcion;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 }

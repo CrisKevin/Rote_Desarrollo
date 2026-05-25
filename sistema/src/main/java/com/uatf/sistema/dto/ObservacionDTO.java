@@ -14,5 +14,6 @@ public class ObservacionDTO {
     private LocalDateTime desde;
     private LocalDateTime hasta;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
 }

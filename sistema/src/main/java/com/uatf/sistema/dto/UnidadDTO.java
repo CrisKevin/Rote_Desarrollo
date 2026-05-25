@@ -19,5 +19,6 @@ public class UnidadDTO {
     private UUID dependiente_id;
     private String dependiente_nombre;
     private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
     
 }
