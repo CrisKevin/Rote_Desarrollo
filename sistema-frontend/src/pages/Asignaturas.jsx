@@ -1,6 +1,6 @@
 // src/pages/Asignaturas.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback} from 'react';
 import { asignaturaService } from '../services/asignaturaService';
 import { unidadService } from '../services/unidadService';
 import ModalFormulario from '../components/ModalFormulario';
@@ -17,6 +17,10 @@ export default function Asignaturas() {
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [errorFormulario, setErrorFormulario] = useState('');
   const [unidades, setUnidades] = useState([]);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || 'ROLE_USER';
+  const isAdmin = userRole === 'ROLE_ADMIN';
+
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -28,11 +32,11 @@ export default function Asignaturas() {
   const isFirstRender = useRef(true);
 
   // Función para cargar asignaturas
-  const cargarItems = async () => {
+  const cargarItems = useCallback( async () => {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = await asignaturaService.getAll();
+    const { data, error: errorMsg } = isAdmin? await asignaturaService.getAll() : await asignaturaService.getAllActive();
     
     if (data) {
       // Ordenar por fecha_creacion (más reciente primero)
@@ -45,12 +49,12 @@ export default function Asignaturas() {
     }
     
     setCargando(false);
-  };
+  },[isAdmin]);
 
   // Función para cargar unidades
-  const cargarUnidades = async () => {
+  const cargarUnidades = useCallback(async () => {
     try {
-      const { data } = await unidadService.getAll();
+      const { data } = isAdmin? await unidadService.getAll() : await unidadService.getAllActive();
       if (data) {
         const unidadesOrdenadas = [...data].sort((a, b) => {
           return a.nombre.localeCompare(b.nombre);
@@ -60,7 +64,7 @@ export default function Asignaturas() {
     } catch (error) {
       console.error('Error cargando unidades:', error);
     }
-  };
+  },[isAdmin]);
 
   const abrirModalNuevo = () => {
     setItemEditando(null);
@@ -113,8 +117,8 @@ export default function Asignaturas() {
   };
 
   const guardarItem = async () => {
-    if (!formData.nombre.trim()) {
-      setErrorFormulario('Por favor completa el campo Nombre');
+    if (!formData.nombre.trim() || !formData.sigla.trim() || !formData.horas_asignadas || !formData.unidad_id) {
+      setErrorFormulario('Por favor complete todos los campos');
       return;
     }
     
@@ -137,8 +141,8 @@ export default function Asignaturas() {
     setCargando(true);
     
     const datosEnviar = {
-      nombre: formData.nombre,
-      sigla: formData.sigla || null,
+      nombre: formData.nombre.toUpperCase().trim(),
+      sigla: formData.sigla.toUpperCase().trim() || null,
       horas_asignadas: horasAsignadasFormateadas,
       unidad_id: formData.unidad_id || null
     };
@@ -175,7 +179,7 @@ export default function Asignaturas() {
     setModalConfirmacionAbierto(false);
     setCargando(true);
     
-    const { error } = await asignaturaService.eliminar(itemAEliminar.id);
+    const { error } = isAdmin? await asignaturaService.eliminar(itemAEliminar.id) : await asignaturaService.eliminarSuave(itemAEliminar.id);
     
     if (!error) {
       await cargarItems();
@@ -198,7 +202,7 @@ export default function Asignaturas() {
       cargarItems();
       cargarUnidades();
     }
-  }, []);
+  }, [cargarItems, cargarUnidades]);
 
   // Filtrar items
   const itemsFiltrados = items.filter((item) => {
@@ -273,7 +277,7 @@ export default function Asignaturas() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nueva Asignatura
@@ -405,9 +409,9 @@ export default function Asignaturas() {
           editando: 'Editar Asignatura'
         }}
         campos={[
-          { name: 'nombre', label: 'Nombre', placeholder: 'Ej: Taller de Redes', required: true },
+          { name: 'nombre', label: 'Nombre', placeholder: 'Ej: Taller de Redes'},
           { name: 'sigla', label: 'Sigla', placeholder: 'Ej: SIS-625' },
-          { name: 'horas_asignadas', label: 'Horas Asignadas', placeholder: 'HH:MM:SS', type: 'number', step:'0.5' },
+          { name: 'horas_asignadas', label: 'Horas Asignadas', placeholder: 'Ej: 2', numeric: true, step:'0.5' },
           { 
             name: 'unidad_id', 
             label: 'Unidad', 

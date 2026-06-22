@@ -147,20 +147,32 @@ export default function TipoCargo() {
     setCargando(true);
     
     if (itemEditando) {
-      const { error } = await tipoCargoService.actualizar(itemEditando.id, formData);
-      if (!error) {
+      const result = await tipoCargoService.actualizar(itemEditando.id, formData);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await tipoCargoService.crear(formData);
-      if (!error) {
+      const result = await tipoCargoService.crear(formData);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -277,7 +289,7 @@ export default function TipoCargo() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo

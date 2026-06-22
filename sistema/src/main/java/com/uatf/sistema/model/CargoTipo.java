@@ -15,15 +15,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
 @Data
-@Table(name = "cargo_tipos")
+@Table(name = "cargo_tipos", 
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"tipo_id","cargo_id"})
+})
 public class CargoTipo {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

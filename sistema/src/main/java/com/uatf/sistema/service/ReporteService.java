@@ -10,6 +10,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -37,7 +40,18 @@ public class ReporteService {
 
     public byte[] generarReportes(UUID unidadId) throws Exception {
 
-        List<ReportesDTO> reportes = repo.obtenerAsignacionesFiltradas(unidadId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        
+        String rol = auth.getAuthorities().stream().findFirst().map(GrantedAuthority::getAuthority).orElse("NO_ROL");
+
+        List<ReportesDTO> reportes;
+        
+        if(rol.equals("ROLE_ADMIN")){
+            reportes = repo.obtenerAsignacionesFiltradas(unidadId);
+        }else{
+            reportes = repo.obtenerAsignacionesLimitado(unidadId);
+        }
+        
         Unidad unidad = unidad_repo.findById(unidadId)
             .orElseThrow(() -> new ResourceNotFoundException("No se encontro la unidad"));
 

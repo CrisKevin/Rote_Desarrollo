@@ -3,7 +3,8 @@ import Navbar from '../components/Navbar';
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+
       {/* Sidebar */}
       <Sidebar />
 

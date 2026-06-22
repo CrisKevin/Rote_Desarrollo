@@ -1,6 +1,6 @@
 // src/pages/AsignarDocente.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { asignarDocenteService } from '../services/asignarDocenteService';
 import { grupoService } from '../services/grupoService';
 import { docenteService } from '../services/docenteService';
@@ -19,6 +19,12 @@ export default function AsignarDocente() {
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [errorFormulario, setErrorFormulario] = useState('');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || 'ROLE_USER';
+  const isAdmin = userRole === 'ROLE_ADMIN';
+  
+  // Estado para filtro de activos (solo para admin)
+  const [filtroActivos, setFiltroActivos] = useState(true);
   
   // Estados para selects
   const [grupos, setGrupos] = useState([]);
@@ -30,23 +36,47 @@ export default function AsignarDocente() {
     grupo_id: '',
     docente_id: '',
     asignatura_id: '',
-    observacion_id: '',  // Observable como texto libre
+    observacion_id: '',
     periodo_id: ''
   });
 
   const isFirstRender = useRef(true);
 
   // Función para cargar asignaciones
-  const cargarItems = async () => {
+  const cargarItems = useCallback(async () => {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = await asignarDocenteService.getAll();
+    let response;
+    if (isAdmin) {
+      // Admin: según el filtro
+      response = filtroActivos 
+        ? await asignarDocenteService.getAllActive()
+        : await asignarDocenteService.getAll();
+    } else {
+      // Usuario normal: solo activos
+      response = await asignarDocenteService.getAllActive();
+    }
+    
+    const { data, error: errorMsg } = response;
     
     if (data) {
-      // Ordenar por fecha_creacion (más reciente primero)
+      // Ordenar primero por docente y luego por fecha de creación (más reciente primero)
       const itemsOrdenados = [...data].sort((a, b) => {
-        return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+        // Primero ordenar por nombre de docente
+        const nombreA = `${a.docente_nombre || ''} ${a.docente_apellido || ''}`.toLowerCase();
+        const nombreB = `${b.docente_nombre || ''} ${b.docente_apellido || ''}`.toLowerCase();
+        
+        const comparacionDocente = nombreA.localeCompare(nombreB);
+        
+        if (comparacionDocente !== 0) {
+          return comparacionDocente;
+        }
+        
+        // Si el docente es el mismo, ordenar por fecha de creación (más reciente primero)
+        const fechaA = new Date(a.fecha_creacion);
+        const fechaB = new Date(b.fecha_creacion);
+        return fechaB - fechaA;
       });
       setItems(itemsOrdenados);
     } else {
@@ -54,12 +84,14 @@ export default function AsignarDocente() {
     }
     
     setCargando(false);
-  };
+  }, [isAdmin, filtroActivos]);
 
   // Función para cargar grupos
-  const cargarGrupos = async () => {
+  const cargarGrupos = useCallback(async () => {
     try {
-      const { data } = await grupoService.getAll();
+      const { data } = isAdmin && !filtroActivos 
+        ? await grupoService.getAll()
+        : await grupoService.getAllActive();
       if (data) {
         const gruposOrdenados = [...data].sort((a, b) => {
           return a.grupo.localeCompare(b.grupo);
@@ -69,12 +101,14 @@ export default function AsignarDocente() {
     } catch (error) {
       console.error('Error cargando grupos:', error);
     }
-  };
+  }, [isAdmin, filtroActivos]);
 
   // Función para cargar docentes
-  const cargarDocentes = async () => {
+  const cargarDocentes = useCallback(async () => {
     try {
-      const { data } = await docenteService.getAll();
+      const { data } = isAdmin && !filtroActivos 
+        ? await docenteService.getAll()
+        : await docenteService.getAllActive();
       if (data) {
         const docentesOrdenados = [...data].sort((a, b) => {
           return a.nombres.localeCompare(b.nombres);
@@ -84,12 +118,14 @@ export default function AsignarDocente() {
     } catch (error) {
       console.error('Error cargando docentes:', error);
     }
-  };
+  }, [isAdmin, filtroActivos]);
 
   // Función para cargar asignaturas
-  const cargarAsignaturas = async () => {
+  const cargarAsignaturas = useCallback(async () => {
     try {
-      const { data } = await asignaturaService.getAll();
+      const { data } = isAdmin && !filtroActivos 
+        ? await asignaturaService.getAll()
+        : await asignaturaService.getAllActive();
       if (data) {
         const asignaturasOrdenadas = [...data].sort((a, b) => {
           return a.nombre.localeCompare(b.nombre);
@@ -99,12 +135,14 @@ export default function AsignarDocente() {
     } catch (error) {
       console.error('Error cargando asignaturas:', error);
     }
-  };
+  }, [isAdmin, filtroActivos]);
 
   // Función para cargar periodos
-  const cargarPeriodos = async () => {
+  const cargarPeriodos = useCallback(async () => {
     try {
-      const { data } = await periodoService.getAll();
+      const { data } = isAdmin && !filtroActivos 
+        ? await periodoService.getAll()
+        : await periodoService.getAllActive();
       if (data) {
         const periodosOrdenados = [...data].sort((a, b) => {
           return a.descripcion.localeCompare(b.descripcion);
@@ -114,7 +152,7 @@ export default function AsignarDocente() {
     } catch (error) {
       console.error('Error cargando periodos:', error);
     }
-  };
+  }, [isAdmin, filtroActivos]);
 
   const abrirModalNuevo = () => {
     setItemEditando(null);
@@ -161,8 +199,8 @@ export default function AsignarDocente() {
   };
 
   const guardarItem = async () => {
-    if (!formData.grupo_id || !formData.docente_id || !formData.asignatura_id) {
-      setErrorFormulario('Por favor completa los campos obligatorios (Grupo, Docente y Asignatura)');
+    if (!formData.grupo_id || !formData.docente_id || !formData.asignatura_id || !formData.periodo_id) {
+      setErrorFormulario('Por favor complete los campos obligatorios');
       return;
     }
     
@@ -178,20 +216,32 @@ export default function AsignarDocente() {
     };
     
     if (itemEditando) {
-      const { error } = await asignarDocenteService.actualizar(itemEditando.id, datosEnviar);
-      if (!error) {
+      const result = await asignarDocenteService.actualizar(itemEditando.id, datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await asignarDocenteService.crear(datosEnviar);
-      if (!error) {
+      const result = await asignarDocenteService.crear(datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -209,7 +259,9 @@ export default function AsignarDocente() {
     setModalConfirmacionAbierto(false);
     setCargando(true);
     
-    const { error } = await asignarDocenteService.eliminar(itemAEliminar.id);
+    const { error } = isAdmin 
+      ? await asignarDocenteService.eliminar(itemAEliminar.id)
+      : await asignarDocenteService.eliminarSuave(itemAEliminar.id);
     
     if (!error) {
       await cargarItems();
@@ -235,9 +287,20 @@ export default function AsignarDocente() {
       cargarAsignaturas();
       cargarPeriodos();
     }
-  }, []);
+  }, [filtroActivos, cargarItems, cargarGrupos, cargarDocentes, cargarAsignaturas, cargarPeriodos]);
 
-  // Filtrar items
+  // Efecto para recargar cuando cambia el filtro
+  useEffect(() => {
+    if (!isFirstRender.current) {
+      cargarItems();
+      cargarGrupos();
+      cargarDocentes();
+      cargarAsignaturas();
+      cargarPeriodos();
+    }
+  }, [filtroActivos, cargarItems, cargarGrupos, cargarDocentes, cargarAsignaturas, cargarPeriodos]);
+
+  // Filtrar items (sin modificar el orden original que ya viene ordenado)
   const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
@@ -251,7 +314,7 @@ export default function AsignarDocente() {
   });
 
   // Pantalla de carga
-  if (cargando) {
+  if (cargando && items.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-start">
@@ -299,8 +362,6 @@ export default function AsignarDocente() {
     );
   }
 
-  
-
   // Pantalla normal
   return (
     <div className="space-y-6">
@@ -315,12 +376,50 @@ export default function AsignarDocente() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nueva Asignación
         </button>
       </div>
+
+      {/* Selector de filtro - solo visible para admin */}
+      {isAdmin && (
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Mostrar:
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFiltroActivos(true)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  filtroActivos 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+              >
+                Solo Activos
+              </button>
+              <button
+                onClick={() => setFiltroActivos(false)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  !filtroActivos 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+              >
+                Ver Todos (incluye inactivos)
+              </button>
+            </div>
+            {!filtroActivos && (
+              <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded">
+                Modo administrador - Mostrando todos los registros
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Barra de búsqueda */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
@@ -372,10 +471,17 @@ export default function AsignarDocente() {
               {itemsFiltrados.map((item) => (
                 <tr
                   key={item.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                    item.estado === false ? 'opacity-60 bg-red-50 dark:bg-red-900/10' : ''
+                  }`}
                 >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                     {item.grupo_nombre || '-'}
+                    {item.estado === false && (
+                      <span className="ml-2 text-xs bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 px-2 py-0.5 rounded">
+                        Inactivo
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {item.docente_nombre ? `${item.docente_nombre} ${item.docente_apellido || ''}` : '-'}
@@ -449,8 +555,6 @@ export default function AsignarDocente() {
         onCancelar={cerrarModalConfirmacion}
       />
 
-        
-
       <ModalFormulario 
         abierto={modalAbierto}
         editando={itemEditando !== null}
@@ -459,6 +563,7 @@ export default function AsignarDocente() {
         onSave={guardarItem}
         onInputChange={handleInputChange}
         error={errorFormulario}
+        columns={2}
         titulo={{
           nuevo: 'Nueva Asignación',
           editando: 'Editar Asignación'
@@ -495,19 +600,20 @@ export default function AsignarDocente() {
             required: true
           },
           { 
-            name: 'observacion_id', 
-            label: 'Observación', 
-            placeholder: 'Observaciones adicionales',
-            type: 'textarea'
-          },
-          { 
             name: 'periodo_id', 
             label: 'Período', 
             type: 'select',
             options: periodos,
             optionLabel: 'descripcion',
             optionValue: 'id',
-            placeholder: 'Seleccione un período'
+            placeholder: 'Seleccione un período',
+            required: true
+          },
+          { 
+            name: 'observacion_id', 
+            label: 'Observación', 
+            placeholder: 'Observaciones adicionales',
+            type: 'textarea'
           }
         ]}
       />

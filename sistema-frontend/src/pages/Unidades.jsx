@@ -126,19 +126,26 @@ export default function Unidades() {
   };
 
   const guardarItem = async () => {
-    if (!formData.nombre.trim() || !formData.tipo_unidad_id) {
-      setErrorFormulario('Por favor completa los campos obligatorios (Nombre y Tipo de Unidad)');
+
+    if (!formData.nombre.trim() || !formData.tipo_unidad_id || !formData.sigla.trim() 
+     || !formData.item) {
+      setErrorFormulario('Por favor complete todos los campos obligatorios');
       return;
     }
     
+    if (isNaN(formData.item) || formData.item <= 0) {
+    setErrorFormulario('El item debe ser un número positivo');
+    return;
+    }
+
     setErrorFormulario('');
     setCargando(true);
     
     // Preparar datos para enviar
     const datosEnviar = {
-      nombre: formData.nombre,
-      sigla: formData.sigla,
-      item: formData.item ? parseInt(formData.item) : null,
+      nombre: formData.nombre.toUpperCase().trim(),
+      sigla: formData.sigla.toUpperCase().trim(),
+      item: formData.item,
       tipo_unidad_id: formData.tipo_unidad_id,
       dependiente_id: formData.dependiente_id || null
     };
@@ -278,7 +285,7 @@ export default function Unidades() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nueva Unidad
@@ -344,7 +351,7 @@ export default function Unidades() {
                     {item.sigla || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.item || '-'}
+                    {item.item ? String(item.item).padStart(4, '0') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {item.tipo_unidad_nombre || '-'}
@@ -416,9 +423,9 @@ export default function Unidades() {
           editando: 'Editar Unidad'
         }}
         campos={[
-          { name: 'nombre', label: 'Nombre', placeholder: 'Ej: Vicerrectorado, Ingeniería de Sistemas...', required: true },
-          { name: 'sigla', label: 'Sigla', placeholder: 'Ej: VICE, SIS...' },
-          { name: 'item', label: 'Item', placeholder: 'Ej: 1000', type: 'number' },
+          { name: 'nombre', label: 'Nombre', placeholder: 'Ej: Vicerrectorado, Ingeniería de Sistemas...', required: true},
+          { name: 'sigla', label: 'Sigla', placeholder: 'Ej: VICE, SIS...', required: true },
+          { name: 'item', label: 'Item', placeholder: 'Ej: 1000', numeric: true, required: true },
           { 
             name: 'tipo_unidad_id', 
             label: 'Tipo de Unidad', 
@@ -436,7 +443,7 @@ export default function Unidades() {
             options: unidadesDisponibles.filter(u => u.id !== (itemEditando?.id)), // No puede depender de sí misma
             optionLabel: 'nombre',
             optionValue: 'id',
-            placeholder: 'Seleccione una unidad (opcional)'
+            placeholder: 'Seleccione una unidad',
           }
         ]}
       />

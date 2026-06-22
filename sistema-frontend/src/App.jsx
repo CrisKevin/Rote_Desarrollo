@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeProvider';
 import DashboardLayout from './layout/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Groups from './pages/Groups';
 import TeachingPosition from './pages/TeachingPosition';
 import TipoCargo from './pages/TipoCargo';
-import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import './App.css';
 import Docentes from './pages/Docentes';
@@ -19,6 +18,7 @@ import Periodos from './pages/Periodos';
 import AsignarDocente from './pages/AsignarDocente';
 import Reportes from './pages/Reportes';
 import Login from './pages/Login';
+import Usuarios from './pages/Usuarios';
 
 // Componente para proteger rutas que requieren autenticación
 const PrivateRoute = ({ children }) => {
@@ -111,18 +111,18 @@ function App() {
             }
           />
           
-          {/* Reportes - todos pueden ver */}
+                    {/* Asignar Docente - solo admin */}
           <Route
-            path="/reportes"
+            path="/asignatura_docente"
             element={
               <PrivateRoute>
                 <DashboardLayout>
-                  <Reports />
+                  <AsignarDocente />
                 </DashboardLayout>
               </PrivateRoute>
             }
           />
-          
+
           {/* ========== RUTAS SOLO PARA ROLE_ADMIN ========== */}
           
           {/* Cargo de Docente - solo admin */}
@@ -209,18 +209,6 @@ function App() {
             }
           />
           
-          {/* Asignar Docente - solo admin */}
-          <Route
-            path="/asignatura_docente"
-            element={
-              <RoleRoute allowedRoles={['ROLE_ADMIN']}>
-                <DashboardLayout>
-                  <AsignarDocente />
-                </DashboardLayout>
-              </RoleRoute>
-            }
-          />
-          
           {/* Periodos - solo admin */}
           <Route
             path="/periodos"
@@ -240,6 +228,17 @@ function App() {
               <RoleRoute allowedRoles={['ROLE_ADMIN']}>
                 <DashboardLayout>
                   <Settings />
+                </DashboardLayout>
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/usuarios"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN']}>
+                <DashboardLayout>
+                  <Usuarios></Usuarios>
                 </DashboardLayout>
               </RoleRoute>
             }

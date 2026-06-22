@@ -13,13 +13,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
 @Data
-@Table(name = "asignatura_docentes")
+@Table(name = "asignatura_docentes",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"unidad_id", 
+            "grupo_id", "docente_id", "asignatura_id", "periodo_id"})
+})
 public class AsignaturaDocente {
 
     @Id

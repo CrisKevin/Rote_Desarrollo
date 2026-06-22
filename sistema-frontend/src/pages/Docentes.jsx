@@ -1,6 +1,6 @@
 // src/pages/Docentes.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback} from 'react';
 import { docenteService } from '../services/docenteService';
 import { unidadService } from '../services/unidadService';
 import { tipoCargoService } from '../services/tipoCargoService';
@@ -19,7 +19,10 @@ export default function Docentes() {
   const [errorFormulario, setErrorFormulario] = useState('');
   const [unidades, setUnidades] = useState([]);
   const [tiposCargo, setTiposCargo] = useState([]);
-  
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || 'ROLE_USER';
+  const isAdmin = userRole === 'ROLE_ADMIN';
+
   const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
@@ -61,11 +64,11 @@ export default function Docentes() {
   })();
 
   // Función para cargar docentes
-  const cargarDocentes = async () => {
+  const cargarDocentes = useCallback(async () => {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = await docenteService.getAll();
+    const { data, error: errorMsg } = isAdmin? await docenteService.getAll() : await docenteService.getAllActive();
     
     if (data) {
       // Ordenar por fecha_creacion (más reciente primero)
@@ -78,12 +81,12 @@ export default function Docentes() {
     }
     
     setCargando(false);
-  };
+  }, [isAdmin]);
 
   // Función para cargar unidades
-  const cargarUnidades = async () => {
+  const cargarUnidades = useCallback (async () => {
     try {
-      const { data } = await unidadService.getAll();
+      const { data } = isAdmin? await unidadService.getAll() : await unidadService.getAllActive;
       if (data) {
         const unidadesOrdenadas = [...data].sort((a, b) => {
           return a.nombre.localeCompare(b.nombre);
@@ -93,12 +96,13 @@ export default function Docentes() {
     } catch (error) {
       console.error('Error cargando unidades:', error);
     }
-  };
+  },[isAdmin]);
 
   // Función para cargar tipos de cargo
-  const cargarTiposCargo = async () => {
+  const cargarTiposCargo = useCallback( async () => {
     try {
-      const { data } = await tipoCargoService.getAll();
+
+      const { data } = isAdmin? await tipoCargoService.getAll() : await tipoCargoService.getAllActive();
       if (data) {
         const tiposOrdenados = [...data].sort((a, b) => {
           return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
@@ -108,7 +112,7 @@ export default function Docentes() {
     } catch (error) {
       console.error('Error cargando tipos de cargo:', error);
     }
-  };
+  },[isAdmin]);
 
   const abrirModalNuevo = () => {
     setDocenteEditando(null);
@@ -169,22 +173,23 @@ export default function Docentes() {
   // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-      if (name === 'tipo_docente_id') {
-        // Limpiar cargo seleccionado
-        setFormData({ 
-          ...formData, 
-          tipo_docente_id: value, 
-          cargo_docente_id: '' 
-        });
-      } else {
-        setFormData({ ...formData, [name]: value });
-      }
+    if (name === 'tipo_docente_id') {
+      // Limpiar cargo seleccionado
+      setFormData({ 
+        ...formData, 
+        tipo_docente_id: value, 
+        cargo_docente_id: '' 
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   // Guardar (crear o actualizar)
   const guardarDocente = async () => {
-    if (!formData.nombres.trim() || !formData.apellidos.trim() || !formData.ci.trim()) {
-      setErrorFormulario('Por favor completa los campos obligatorios (Nombres, Apellidos y CI)');
+    if (!formData.nombres.trim() || !formData.apellidos.trim() || !formData.ci.trim()
+       || !formData.tipo_docente_id || !formData.cargo_docente_id) {
+      setErrorFormulario('Por favor completa los campos obligatorios');
       return;
     }
     
@@ -198,30 +203,42 @@ export default function Docentes() {
     );
     
     const datosEnviar = {
-      nombres: formData.nombres,
-      apellidos: formData.apellidos,
+      nombres: formData.nombres.toUpperCase().trim(),
+      apellidos: formData.apellidos.toUpperCase().trim(),
       ci: formData.ci,
       observaciones: formData.observaciones,
-      dedicacion: formData.dedicacion,
+      dedicacion: formData.dedicacion.toUpperCase().trim(),
       cargo_tipo_id: relacionEncontrada?.id || null,
       unidad_id: formData.unidad_id || null
     };
     
     if (docenteEditando) {
-      const { error } = await docenteService.actualizar(docenteEditando.id, datosEnviar);
-      if (!error) {
+      const result = await docenteService.actualizar(docenteEditando.id, datosEnviar);
+      if (!result.error) {
         await cargarDocentes();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await docenteService.crear(datosEnviar);
-      if (!error) {
+      const result = await docenteService.crear(datosEnviar);
+      if (!result.error) {
         await cargarDocentes();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -239,8 +256,7 @@ export default function Docentes() {
     
     setModalConfirmacionAbierto(false);
     setCargando(true);
-    
-    const { error } = await docenteService.eliminar(docenteAEliminar.id);
+    const { error } = isAdmin? await docenteService.eliminar(docenteAEliminar.id) : await docenteService.eliminarSoft(docenteAEliminar.id);
     
     if (!error) {
       await cargarDocentes();
@@ -264,7 +280,7 @@ export default function Docentes() {
       cargarUnidades();
       cargarTiposCargo();
     }
-  }, []);
+  }, [cargarDocentes, cargarTiposCargo, cargarUnidades]);
 
   // Filtrar docentes
   const docentesFiltrados = docentes.filter((docente) => {
@@ -342,7 +358,7 @@ export default function Docentes() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo Docente
@@ -494,6 +510,7 @@ export default function Docentes() {
         onSave={guardarDocente}
         onInputChange={handleInputChange}
         error={errorFormulario}
+        columns={2}
         titulo={{
           nuevo: 'Nuevo Docente',
           editando: 'Editar Docente'
@@ -502,7 +519,7 @@ export default function Docentes() {
           { name: 'nombres', label: 'Nombres', placeholder: 'Ej: Juan Carlos', required: true },
           { name: 'apellidos', label: 'Apellidos', placeholder: 'Ej: Pérez García', required: true },
           { name: 'ci', label: 'Cédula de Identidad', placeholder: 'Ej: 12345678', required: true },
-          { name: 'dedicacion', label: 'Dedicación', placeholder: 'Ej: Tiempo completo, Medio tiempo' },
+          { name: 'dedicacion', label: 'Dedicación', placeholder: 'Ej: Tiempo completo, Medio tiempo', required: true},
           { 
             name: 'tipo_docente_id', 
             label: 'Tipo de Docente', 
@@ -523,7 +540,8 @@ export default function Docentes() {
             })(),
             optionLabel: 'nombre',
             optionValue: 'id',
-            placeholder: 'Seleccione un tipo de docente'
+            placeholder: 'Seleccione un tipo de docente',
+            required: true
           },
           { 
             name: 'cargo_docente_id', 
@@ -533,7 +551,8 @@ export default function Docentes() {
             optionLabel: 'nombre',
             optionValue: 'id',
             placeholder: 'Primero seleccione un tipo de docente',
-            disabled: !formData.tipo_docente_id
+            disabled: !formData.tipo_docente_id,
+            required: true
           },
           { 
             name: 'unidad_id', 
@@ -542,7 +561,8 @@ export default function Docentes() {
             options: unidades,
             optionLabel: 'nombre',
             optionValue: 'id',
-            placeholder: 'Seleccione una unidad'
+            placeholder: 'Seleccione una unidad',
+            required: true
           },
           { name: 'observaciones', label: 'Observaciones', placeholder: 'Observaciones adicionales', type: 'textarea' }
         ]}

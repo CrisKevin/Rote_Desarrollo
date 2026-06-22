@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,13 +29,13 @@ public class AsignaturaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AsignaturaDTO>> findAll(){
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<AsignaturaDTO>> findAll(@RequestHeader("Authorization") String authHeader){
+        return ResponseEntity.ok(service.findAll(authHeader));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<AsignaturaDTO>> findAllActive(){
-        return ResponseEntity.ok(service.findAllActive());
+    public ResponseEntity<List<AsignaturaDTO>> findAllActive(@RequestHeader("Authorization") String authHeader){
+        return ResponseEntity.ok(service.findAllActive(authHeader));
     }
 
     @GetMapping("/{id}")

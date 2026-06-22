@@ -74,28 +74,45 @@ export default function TipoDocente() {
 
   const guardarItem = async () => {
     if (!formData.tipo.trim()) {
-      setErrorFormulario('Por favor completa el campo Tipo');
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
     setErrorFormulario('');
     setCargando(true);
     
+    const datosGuardar = {
+      tipo: formData.tipo.toUpperCase().trim(),
+      descripcion: formData.descripcion
+    }
+
     if (itemEditando) {
-      const { error } = await tipoDocenteService.actualizar(itemEditando.id, formData);
-      if (!error) {
+      const result = await tipoDocenteService.actualizar(itemEditando.id, datosGuardar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await tipoDocenteService.crear(formData);
-      if (!error) {
+      const result = await tipoDocenteService.crear(datosGuardar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -209,7 +226,7 @@ return (
       </div>
       <button 
         onClick={abrirModalNuevo}
-        className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+        className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
       >
         <Plus className="w-5 h-5" />
         Nuevo Tipo
@@ -329,7 +346,7 @@ return (
         editando: 'Editar Tipo de Docente'
       }}
       campos={[
-        { name: 'tipo', label: 'Tipo', placeholder: 'Ej: TIEMPO COMPLETO, MEDIO TIEMPO...' },
+        { name: 'tipo', label: 'Tipo', placeholder: 'Ej: TIEMPO COMPLETO, MEDIO TIEMPO...', required: true},
         { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del tipo' }
       ]}
     />

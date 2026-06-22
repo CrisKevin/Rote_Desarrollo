@@ -7,6 +7,10 @@ export const grupoService = {
         return await api.get(BASE_URL);
     },
 
+    getAllActive: async () => {
+        return await api.get(`${BASE_URL}/active`);
+    },
+
     crear: async (grupo) => {
         return await api.post(BASE_URL, grupo);
     },
@@ -17,5 +21,9 @@ export const grupoService = {
 
     eliminar: async (id) => {
         return await api.delete(`${BASE_URL}/${id}`);
+    },
+    
+    eliminarSuave: async (id) => {
+        return await api.delete(`${BASE_URL}/soft/${id}`);
     }
 };

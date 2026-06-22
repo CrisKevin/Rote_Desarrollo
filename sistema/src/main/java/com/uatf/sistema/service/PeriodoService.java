@@ -1,5 +1,6 @@
 package com.uatf.sistema.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,11 +30,30 @@ public class PeriodoService {
     }
 
     public List<PeriodoDTO> findAll(){
-        return repo.findAll().stream().map(PeriodoMapper::toDTO).toList();
+        List<Periodo> todos = repo.findAll();
+
+        todos.forEach(periodo -> {
+            if(periodo.getHasta().isBefore(LocalDate.now()) && periodo.getEstado())
+                softDelete(periodo.getId());
+        });
+
+        return todos.stream().map(PeriodoMapper::toDTO).toList();
     }
 
     public List<PeriodoDTO> findAllActive(){
-        return repo.findByEstado(true).stream().map(PeriodoMapper::toDTO).toList();
+
+        List<Periodo> activos = repo.findByEstado(true);
+
+        activos.removeIf(periodo ->{
+            if(periodo.getHasta().isBefore(LocalDate.now()) && periodo.getEstado()){
+                softDelete(periodo.getId());
+                return true;
+            }
+            return false;
+        });
+
+        return activos.stream().map(PeriodoMapper::toDTO).toList();
+
     }
 
     public PeriodoDTO findOne(UUID id){

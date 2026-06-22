@@ -1,5 +1,6 @@
 package com.uatf.sistema.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,8 +13,8 @@ public class PeriodoDTO {
 
     private UUID id;
     private String descripcion;
-    private LocalDateTime desde;
-    private LocalDateTime hasta;
+    private LocalDate desde;
+    private LocalDate hasta;
     private UUID gestion_id;
     private String gestion_nombre;
     private UUID tipo_periodo_id;

@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply transition-colors duration-200;
+}
 
 /* * {
   @apply transition-colors duration-200;
@@ -11,7 +17,7 @@ html.dark {
 
 body {
   margin: 0;
-}
+}ya
 
 #root {
   width: 1126px;

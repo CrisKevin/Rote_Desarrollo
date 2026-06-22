@@ -12,24 +12,44 @@ import com.uatf.sistema.model.TipoUnidad;
 import com.uatf.sistema.model.Unidad;
 import com.uatf.sistema.repository.TipoUnidadRepository;
 import com.uatf.sistema.repository.UnidadRepository;
+import com.uatf.sistema.security.JwtService;
 
 @Service
 public class UnidadService {
 
     private final UnidadRepository repo;
     private final TipoUnidadRepository tipo_unidad_repo;
+    private final JwtService jwtService;
 
-    public UnidadService(UnidadRepository repo, TipoUnidadRepository tipo_unidad_repo){
+    public UnidadService(UnidadRepository repo, TipoUnidadRepository tipo_unidad_repo, JwtService jwtService){
         this.repo = repo;
         this.tipo_unidad_repo = tipo_unidad_repo;
+        this.jwtService = jwtService;
     }
     
     public List<UnidadDTO> findAll(){
         return repo.findAll().stream().map(UnidadMapper::toDTO).toList();
     }
 
-    public List<UnidadDTO> findAllActive(){
-        return repo.findByEstado(true).stream().map(UnidadMapper::toDTO).toList();
+    public List<UnidadDTO> findAllActive(String authHeader){
+
+        String token = authHeader.replace("Bearer", "").trim();
+
+        UUID unidadId = jwtService.extractUnidadId(token);
+
+        Unidad userUnidad = repo.findById(unidadId)
+            .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
+
+        List<Unidad> unidades = repo.findByEstado(true);
+
+        unidades.removeIf(dato ->{
+            if(!(userUnidad.getId().equals(dato.getId()) || (dato.getUnidad() != null && userUnidad.getId().equals(dato.getUnidad().getId())))){
+                return true;
+            }
+            return false;
+        });
+
+        return unidades.stream().map(UnidadMapper::toDTO).toList();
     }
 
     public UnidadDTO findOne(UUID id){

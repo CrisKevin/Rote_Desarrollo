@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
+import {
   LayoutDashboard,
   Users,
   GraduationCap,
@@ -8,7 +8,7 @@ import {
   UserCircle,
   BarChart3,
   FileText,
-  Settings,
+  //Settings,
   Menu,
   X,
 } from 'lucide-react';
@@ -20,7 +20,7 @@ export default function Sidebar() {
   // Obtener el rol del usuario del localStorage
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = user?.role || 'ROLE_USER';
-  const isROLE_ADMIN = userRole === 'ROLE_ADMIN';
+  const isAdmin = userRole === 'ROLE_ADMIN';
 
   const menuItems = [
     {
@@ -35,7 +35,7 @@ export default function Sidebar() {
       label: 'Grupos',
       icon: Users,
       path: '/grupos',
-      roles: ['ROLE_ADMIN', 'ROLE_USER']
+      roles: ['ROLE_ADMIN']
     },
     {
       id: 'teaching-position',
@@ -47,98 +47,98 @@ export default function Sidebar() {
     {
       id: 'tipo-cargo',
       label: 'Tipo de Cargo',
-      icon: Tags, 
+      icon: Tags,
       path: '/tipo_cargo',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'tipo-docente',
       label: 'Tipo de Docente',
-      icon: Tags, 
+      icon: Tags,
       path: '/tipo_docente',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'docente',
       label: 'Docentes',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/docentes',
       roles: ['ROLE_ADMIN', 'ROLE_USER']
     },
     {
       id: 'tipo-unidad',
       label: 'Tipo de Unidad',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/tipo_unidad',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'unidad',
       label: 'Unidades',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/unidades',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'asignatura',
       label: 'Asignaturas',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/asignaturas',
       roles: ['ROLE_ADMIN', 'ROLE_USER']
     },
     {
       id: 'gestion',
       label: 'Gestiones',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/gestiones',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'tipo-periodo',
       label: 'Tipo de Periodo',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/tipo_periodo',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'periodo',
       label: 'Periodos',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/periodos',
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
       id: 'asignatura-docente',
       label: 'Asignatura de Docentes',
-      icon: UserCircle, 
+      icon: UserCircle,
       path: '/asignatura_docente',
-      roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
+      roles: ['ROLE_ADMIN', 'ROLE_USER'] // Solo ROLE_ADMIN
     },
     {
       id: 'reportes',
       label: 'PDF',
-      icon: FileText, 
+      icon: FileText,
       path: '/reporte',
       roles: ['ROLE_ADMIN', 'ROLE_USER']
     },
+    // {
+    //   id: 'settings',
+    //   label: 'Configuración',
+    //   icon: Settings,
+    //   path: '/configuracion',
+    //   roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
+    // },
     {
       id: 'reports',
-      label: 'Reportes',
+      label: 'Usuarios',
       icon: BarChart3,
-      path: '/reportes',
-      roles: ['ROLE_ADMIN', 'ROLE_USER']
-    },
-    {
-      id: 'settings',
-      label: 'Configuración',
-      icon: Settings,
-      path: '/configuracion',
-      roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
+      path: '/usuarios',
+      roles: ['ROLE_ADMIN']
     },
   ];
 
   // Filtrar items según el rol del usuario
-  const filteredMenuItems = menuItems.filter(item => 
+  const filteredMenuItems = menuItems.filter(item =>
     item.roles.includes(userRole)
   );
 
@@ -181,7 +181,7 @@ export default function Sidebar() {
               UATF
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {isROLE_ADMIN ? 'ROLE_ADMINistrador' : 'Sistema Académico'}
+              {isAdmin ? 'Rol Administrador' : 'Sistema Académico'}
             </p>
           </div>
 
@@ -198,7 +198,7 @@ export default function Sidebar() {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                     active
-                      ? 'bg-primary text-white'
+                      ? 'bg-indigo-600 text-white dark:bg-indigo-500'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
@@ -216,7 +216,7 @@ export default function Sidebar() {
                 {user?.username || 'Usuario'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Rol: {userRole === 'ROLE_ADMIN' ? 'ROLE_ADMINistrador' : 'Usuario'}
+                Rol: {userRole === 'ROLE_ADMIN' ? 'Rol Administrador' : 'Usuario'}
               </p>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">

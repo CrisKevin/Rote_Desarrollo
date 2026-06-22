@@ -2,6 +2,7 @@ package com.uatf.sistema.security;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -21,7 +22,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    public String generateToken(UserDetails user){
+    public String generateToken(UserDetails user, UUID unidad_id){
         return Jwts.builder()
             .subject(user.getUsername())
             .claim("roles", user.getAuthorities()
@@ -29,6 +30,7 @@ public class JwtService {
                 .map(a -> a.getAuthority())
                 .toList()
             )
+            .claim("unidad", unidad_id)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
             .signWith(getKey())
@@ -48,10 +50,16 @@ public class JwtService {
         }
     }
 
-    public List<String> stractRoles(String token){
+    public List<String> extractRoles(String token){
         Claims claims = getClaims(token);
         List<?> misterio = claims.get("roles", List.class);
         return misterio.stream().map(Object::toString).toList();
+    }
+
+    public UUID extractUnidadId(String token){
+        Claims claims = getClaims(token);
+        String unidadId = claims.get("unidad", String.class);
+        return UUID.fromString(unidadId);
     }
 
     private Claims getClaims(String token){

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +33,7 @@ public class Docente {
 
     private String apellidos;
 
+    @Column(unique = true)
     private String ci;
 
     private String observaciones;
@@ -56,4 +58,7 @@ public class Docente {
 
     @OneToMany(mappedBy = "docente")
     private List<AsignaturaDocente> asignatura_docentes;
+
+    @OneToMany(mappedBy = "docente")
+    private List<Usuario> usuarios;
 }

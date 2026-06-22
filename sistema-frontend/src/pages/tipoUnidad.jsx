@@ -73,29 +73,46 @@ export default function TipoUnidad() {
   };
 
   const guardarItem = async () => {
-    if (!formData.tipo.trim() || !formData.descripcion.trim()) {
-      setErrorFormulario('Por favor completa todos los campos');
+    if (!formData.tipo.trim()) {
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
     setErrorFormulario('');
     setCargando(true);
     
+    const datosEnviar = {
+      tipo: formData.tipo.toUpperCase().trim(),
+      descripcion: formData.descripcion
+    }
+
     if (itemEditando) {
-      const { error } = await tipoUnidadService.actualizar(itemEditando.id, formData);
-      if (!error) {
+      const result = await tipoUnidadService.actualizar(itemEditando.id, datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await tipoUnidadService.crear(formData);
-      if (!error) {
+      const result = await tipoUnidadService.crear(datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -209,7 +226,7 @@ export default function TipoUnidad() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-back px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo Tipo
@@ -263,7 +280,7 @@ export default function TipoUnidad() {
                     {item.tipo}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.descripcion}
+                    {item.descripcion || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
                     {new Date(item.fecha_creacion).toLocaleString()}
@@ -329,8 +346,8 @@ export default function TipoUnidad() {
           editando: 'Editar Tipo de Unidad'
         }}
         campos={[
-          { name: 'tipo', label: 'Tipo', placeholder: 'Ej: Superior, Carrera, Departamento...' },
-          { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del tipo de unidad' }
+          { name: 'tipo', label: 'Tipo', placeholder: 'Ej: Superior, Carrera, Departamento...', required: true },
+          { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del tipo de unidad'}
         ]}
       />
     </div>

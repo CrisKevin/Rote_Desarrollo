@@ -13,13 +13,18 @@ export default function Reportes() {
   const [generando, setGenerando] = useState(false);
   const [generandoMultiple, setGenerandoMultiple] = useState(false);
   const [error, setError] = useState('');
-
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || 'ROLE_USER';
+  const isAdmin = userRole === 'ROLE_ADMIN';
   // Cargar unidades al montar el componente
   useEffect(() => {
     const cargarUnidades = async () => {
       setCargandoUnidades(true);
       try {
-        const { data, error: errorMsg } = await unidadService.getAll();
+        console.log(isAdmin);
+        const { data, error: errorMsg } = isAdmin ? 
+          await unidadService.getAll() :
+          await unidadService.getAllActive();
         if (data) {
           // Filtrar unidades superiores (dependiente_id == null)
           const superiores = data.filter(unidad => !unidad.dependiente_id);
@@ -46,7 +51,7 @@ export default function Reportes() {
     };
 
     cargarUnidades();
-  }, []);
+  }, [isAdmin]);
 
   const generarReporte = async (tipo = 'simple') => {
     // Verificar que al menos una unidad esté seleccionada
@@ -150,7 +155,7 @@ export default function Reportes() {
           </p>
 
           {/* Selector de Unidad Superior */}
-          <div className="mb-6">
+          {isAdmin && (<div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Unidad Superior (Facultad/Departamento)
             </label>
@@ -186,7 +191,7 @@ export default function Reportes() {
                 ✓ Unidad superior seleccionada - Reporte múltiple disponible
               </p>
             )}
-          </div>
+          </div>)}
 
           {/* Selector de Carrera/Unidad Hija */}
           <div className="mb-6">
@@ -256,7 +261,7 @@ export default function Reportes() {
             </button>
 
             {/* Botón Reporte Múltiple - Solo disponible para unidades superiores */}
-            <button
+            {isAdmin && (<button
               onClick={handleGenerarMultiple}
               disabled={isMultipleDisabled}
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -272,7 +277,7 @@ export default function Reportes() {
                   Generar Reporte Múltiple
                 </>
               )}
-            </button>
+            </button>)}
           </div>
 
           {/* Mensaje informativo sobre disponibilidad de reportes */}

@@ -13,25 +13,62 @@ import com.uatf.sistema.model.Asignatura;
 import com.uatf.sistema.model.Unidad;
 import com.uatf.sistema.repository.AsignaturaRepository;
 import com.uatf.sistema.repository.UnidadRepository;
+import com.uatf.sistema.security.JwtService;
 
 @Service
 public class AsignaturaService {
 
     private final AsignaturaRepository repo;
     private final UnidadRepository unidad_repo;
+    private final JwtService jwtService;
 
-    public AsignaturaService(AsignaturaRepository repo, UnidadRepository unidad_repo) {
+    public AsignaturaService(AsignaturaRepository repo, UnidadRepository unidad_repo, JwtService jwtService) {
         this.repo = repo;
         this.unidad_repo = unidad_repo;
+        this.jwtService = jwtService;
     }
 
-    public List<AsignaturaDTO> findAll() {
-        return repo.findAll().stream().map(AsignaturaMapper::toDTO)
+    public List<AsignaturaDTO> findAll(String authHeader) {
+
+        String token = authHeader.replace("Bearer", "").trim();
+
+        UUID unidadId = jwtService.extractUnidadId(token);
+
+        Unidad userUnidad = unidad_repo.findById(unidadId)
+            .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
+
+        List<Asignatura> asignaturas = repo.findAll();
+
+        asignaturas.removeIf(dato ->{
+            if(!(userUnidad.getId().equals(dato.getUnidad().getId()) || (dato.getUnidad().getUnidad() != null && userUnidad.getId().equals(dato.getUnidad().getUnidad().getId())))){
+                return true;
+            }
+            return false;
+        });
+
+        return asignaturas.stream().map(AsignaturaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AsignaturaDTO> findAllActive(){
-        return repo.findByEstado(true).stream().map(AsignaturaMapper::toDTO)
+    public List<AsignaturaDTO> findAllActive(String authHeader){
+
+        String token = authHeader.replace("Bearer", "").trim();
+
+        UUID unidadId = jwtService.extractUnidadId(token);
+
+        Unidad userUnidad = unidad_repo.findById(unidadId)
+            .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
+
+        List<Asignatura> asignaturas = repo.findByEstado(true);
+
+        asignaturas.removeIf(dato ->{
+            if(!(userUnidad.getId().equals(dato.getUnidad().getId()) || userUnidad.getId().equals(dato.getUnidad().getUnidad().getId()))){
+                return true;
+            }
+            return false;
+        });
+
+        return asignaturas.stream().map(AsignaturaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 

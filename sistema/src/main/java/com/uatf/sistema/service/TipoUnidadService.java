@@ -3,9 +3,11 @@ package com.uatf.sistema.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.TipoUnidadDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.TipoUnidadMapper;
 import com.uatf.sistema.model.TipoUnidad;
@@ -48,7 +50,11 @@ public class TipoUnidadService {
         
         TipoUnidad tipoUnidad = TipoUnidadMapper.toEntity(dto);
 
-        return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
+        try{
+            return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un tipo de unidad con este nombre");
+        }
     }
 
     public TipoUnidadDTO update(UUID id, TipoUnidadDTO dto){
@@ -59,7 +65,11 @@ public class TipoUnidadService {
         tipoUnidad.setTipo(dto.getTipo());
         tipoUnidad.setDescripcion(dto.getDescripcion());
 
-        return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
+        try{
+            return TipoUnidadMapper.toDTO(repo.save(tipoUnidad));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un tipo de unidad con este nombre");
+        }
     }
 
     public void delete(UUID id){

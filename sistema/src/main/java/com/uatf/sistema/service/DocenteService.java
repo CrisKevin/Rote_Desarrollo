@@ -3,9 +3,11 @@ package com.uatf.sistema.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.DocenteDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.DocenteMapper;
 import com.uatf.sistema.model.CargoTipo;
@@ -65,7 +67,11 @@ public class DocenteService {
         docente.setCargo_tipo(cargo_tipo);
         docente.setUnidad(unidad);
 
-        return DocenteMapper.toDTO(repo.save(docente));
+        try{
+            return DocenteMapper.toDTO(repo.save(docente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un docente con este CI");
+        }
     }
 
     public DocenteDTO update(UUID id, DocenteDTO dto){
@@ -87,7 +93,11 @@ public class DocenteService {
         docente.setCargo_tipo(cargoTipo);
         docente.setUnidad(unidad);
 
-        return DocenteMapper.toDTO(repo.save(docente));
+        try{
+            return DocenteMapper.toDTO(repo.save(docente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un docente con este CI");
+        }
     }
 
     public void delete(UUID id){

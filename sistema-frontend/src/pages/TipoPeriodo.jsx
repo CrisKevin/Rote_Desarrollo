@@ -74,7 +74,7 @@ export default function TipoPeriodo() {
 
   const guardarItem = async () => {
     if (!formData.tipo.trim()) {
-      setErrorFormulario('Por favor completa el campo Tipo');
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
@@ -82,7 +82,7 @@ export default function TipoPeriodo() {
     setCargando(true);
     
     const datosEnviar = {
-      tipo: formData.tipo,
+      tipo: formData.tipo.toUpperCase().trim(),
       descripcion: formData.descripcion || null
     };
     
@@ -214,7 +214,7 @@ export default function TipoPeriodo() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo Tipo

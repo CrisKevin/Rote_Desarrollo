@@ -3,9 +3,11 @@ package com.uatf.sistema.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.GrupoDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.GrupoMapper;
 import com.uatf.sistema.model.Grupo;
@@ -48,7 +50,11 @@ public class GrupoService {
 
         Grupo grupo = GrupoMapper.toEntity(dto);
 
-        return GrupoMapper.toDTO(repo.save(grupo));
+        try{
+            return GrupoMapper.toDTO(repo.save(grupo));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un grupo con ese nombre");
+        }
     }
 
     public GrupoDTO update(UUID id, GrupoDTO dto){
@@ -58,7 +64,12 @@ public class GrupoService {
 
         grupo.setGrupo(dto.getGrupo());
         grupo.setDescripcion(dto.getDescripcion());
-        return GrupoMapper.toDTO(repo.save(grupo));
+        
+        try{
+            return GrupoMapper.toDTO(repo.save(grupo));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un grupo con ese nombre");
+        }
     }
 
     public void delete(UUID id){

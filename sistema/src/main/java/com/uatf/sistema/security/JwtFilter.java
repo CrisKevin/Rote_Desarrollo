@@ -46,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 if(jwt.isValid(token)){
 
-                    List<String> roles = jwt.stractRoles(token);
+                    List<String> roles = jwt.extractRoles(token);
 
                     List<SimpleGrantedAuthority> authorities = roles.stream()
                         .map(SimpleGrantedAuthority::new)

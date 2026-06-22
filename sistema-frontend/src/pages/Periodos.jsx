@@ -125,13 +125,14 @@ const cargarTiposPeriodo = async () => {
     setPeriodoEditando(null);
     // Formato local datetime-local: YYYY-MM-DDThh:mm
     const ahora = new Date();
-    const fechaHoraActual = ahora.toISOString().slice(0, 16);
-    const fechaHoraManana = new Date(ahora.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
-    
+    const manana = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+    const fechaHoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+    const fechaManana = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, '0')}-${String(manana.getDate()).padStart(2, '0')}`;
+  
     setFormData({ 
       descripcion: '',
-      desde: fechaHoraActual,
-      hasta: fechaHoraManana,
+      desde: fechaHoy,
+      hasta: fechaManana,
       gestion_id: '',
       tipo_periodo_id: ''
     });
@@ -143,8 +144,8 @@ const cargarTiposPeriodo = async () => {
     setPeriodoEditando(periodo);
     
     // Convertir ISO string a formato local datetime-local (YYYY-MM-DDThh:mm)
-    const desdeFormateado = periodo.desde ? periodo.desde.slice(0, 16) : '';
-    const hastaFormateado = periodo.hasta ? periodo.hasta.slice(0, 16) : '';
+    const desdeFormateado = periodo.desde ? periodo.desde.slice(0, 10) : '';
+    const hastaFormateado = periodo.hasta ? periodo.hasta.slice(0, 10) : '';
     
     setFormData({
       descripcion: periodo.descripcion || '',
@@ -196,20 +197,10 @@ const cargarTiposPeriodo = async () => {
 
   // Guardar (crear o actualizar)
   const guardarPeriodo = async () => {
-    if (!formData.descripcion.trim()) {
-      setErrorFormulario('Por favor completa la descripción del periodo');
+    if (!formData.descripcion.trim() || !formData.gestion_id || !formData.tipo_periodo_id){
+      setErrorFormulario('Por favor complete todos los campos');
       return;
-    }
-    
-    if (!formData.gestion_id) {
-      setErrorFormulario('Por favor selecciona una gestión');
-      return;
-    }
-    
-    if (!formData.tipo_periodo_id) {
-      setErrorFormulario('Por favor selecciona un tipo de periodo');
-      return;
-    }
+     }
     
     if (!validarFechas()) {
       return;
@@ -220,13 +211,13 @@ const cargarTiposPeriodo = async () => {
     
     // Formatear fechas a ISO 8601
     const datosEnviar = {
-      descripcion: formData.descripcion,
-      desde: formData.desde ? new Date(formData.desde).toISOString() : null,
-      hasta: formData.hasta ? new Date(formData.hasta).toISOString() : null,
+      descripcion: formData.descripcion.toUpperCase().trim(),
+      desde: formData.desde ? formData.desde + 'T00:00:00' : null,
+      hasta: formData.hasta ? formData.hasta + 'T00:00:00' : null,
       gestion_id: formData.gestion_id,
       tipo_periodo_id: formData.tipo_periodo_id
     };
-    
+
     if (periodoEditando) {
       const { error } = await periodoService.actualizar(periodoEditando.id, datosEnviar);
       if (!error) {
@@ -359,7 +350,7 @@ const cargarTiposPeriodo = async () => {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo Periodo
@@ -422,10 +413,10 @@ const cargarTiposPeriodo = async () => {
                     {periodo.descripcion}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {periodo.desde ? new Date(periodo.desde).toLocaleString() : '-'}
+                    {periodo.desde ? periodo.desde.split('-').reverse().join('/') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {periodo.hasta ? new Date(periodo.hasta).toLocaleString() : '-'}
+                    {periodo.hasta ? periodo.hasta.split('-').reverse().join('/') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {periodo.gestion_nombre || '-'}
@@ -498,9 +489,9 @@ const cargarTiposPeriodo = async () => {
           editando: 'Editar Periodo'
         }}
         campos={[
-          { name: 'descripcion', label: 'Descripción', placeholder: 'Ej: Primer Semestre 2025', required: true },
-          { name: 'desde', label: 'Desde', type: 'datetime-local', required: true },
-          { name: 'hasta', label: 'Hasta', type: 'datetime-local', required: true },
+          { name: 'descripcion', label: 'Descripción', placeholder: 'Ej: 2/2026' },
+          { name: 'desde', label: 'Desde', type: 'date' },
+          { name: 'hasta', label: 'Hasta', type: 'date' },
           { 
             name: 'gestion_id', 
             label: 'Gestión', 
@@ -509,7 +500,6 @@ const cargarTiposPeriodo = async () => {
             optionLabel: 'nombre',
             optionValue: 'id',
             placeholder: 'Seleccione una gestión',
-            required: true
           },
           { 
             name: 'tipo_periodo_id', 
@@ -519,7 +509,6 @@ const cargarTiposPeriodo = async () => {
             optionLabel: 'nombre',
             optionValue: 'id',
             placeholder: 'Seleccione un tipo de periodo',
-            required: true
           }
         ]}
       />

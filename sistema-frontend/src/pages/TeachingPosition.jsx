@@ -73,29 +73,46 @@ export default function TeachingPosition() {
   };
 
   const guardarItem = async () => {
-    if (!formData.cargo.trim() || !formData.descripcion.trim()) {
-      setErrorFormulario('Por favor completa todos los campos');
+    if (!formData.cargo.trim()) {
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
     setErrorFormulario('');
     setCargando(true);
     
+    const datosEnviar = {
+      cargo: formData.cargo.toUpperCase().trim(),
+      descripcion: formData.descripcion
+    }
+
     if (itemEditando) {
-      const { error } = await teachingPositionService.actualizar(itemEditando.id, formData);
-      if (!error) {
+      const result = await teachingPositionService.actualizar(itemEditando.id, datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await teachingPositionService.crear(formData);
-      if (!error) {
+      const result = await teachingPositionService.crear(datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -209,7 +226,7 @@ export default function TeachingPosition() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo
@@ -263,7 +280,7 @@ export default function TeachingPosition() {
                     {item.cargo}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.descripcion}
+                    {item.descripcion || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
                     {new Date(item.fecha_creacion).toLocaleString()}
@@ -329,7 +346,7 @@ export default function TeachingPosition() {
           editando: 'Editar Cargo de Docente'
         }}
         campos={[
-          { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.' },
+          { name: 'cargo', label: 'Cargo', placeholder: 'Ej: Profesor, Director, etc.', required: true},
           { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del cargo' }
         ]}
       />

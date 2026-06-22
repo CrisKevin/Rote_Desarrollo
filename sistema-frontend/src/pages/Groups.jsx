@@ -71,13 +71,19 @@ export default function Groups() {
   // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    if(name === 'grupo'){
+      const normalizedValue = value.toUpperCase().trim();
+      setFormData({ ...formData, [name]: normalizedValue });
+    }else{
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   // Guardar (crear o actualizar)
   const guardarGrupo = async () => {
-    if (!formData.grupo.trim() || !formData.descripcion.trim()) {
-      setErrorFormulario('Por favor completa todos los campos');
+    if (!formData.grupo.trim()) {
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
@@ -85,22 +91,33 @@ export default function Groups() {
     setCargando(true);
     
     if (grupoEditando) {
-    // Editar existente
-    const { error } = await grupoService.actualizar(grupoEditando.id, formData);
-    if (!error) {
+    const result = await grupoService.actualizar(grupoEditando.id, formData);
+    if (!result.error) {
       await cargarGrupos();
       cerrarModal();
     } else {
-      setErrorFormulario('Error al actualizar: ' + error);
+      try {
+          const errorObj = JSON.parse(result.error);
+          const mensajeError = errorObj.error || result.error;
+          setErrorFormulario('Error al actualizar: ' + mensajeError);
+      } catch {
+          setErrorFormulario('Error al actualizar: ' + result.error);
+      }
     }
   } else {
     // Crear nuevo
-    const { error } = await grupoService.crear(formData);
-    if (!error) {
+    const result = await grupoService.crear(formData);
+    if (!result.error) {
       await cargarGrupos();
       cerrarModal();
     } else {
-      setErrorFormulario('Error al crear: ' + error);
+      try {
+          const errorObj = JSON.parse(result.error);
+          const mensajeError = errorObj.error || result.error;
+          setErrorFormulario('Error al crear: ' + mensajeError);
+      } catch {
+          setErrorFormulario('Error al crear: ' + result.error);
+      }
     }
   }
     
@@ -219,7 +236,7 @@ const cerrarModalConfirmacion = () => {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nuevo Grupo
@@ -270,10 +287,10 @@ const cerrarModalConfirmacion = () => {
             className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-              Grupo {grupo.grupo}
+              GRUPO {grupo.grupo}
             </td>
             <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-              {grupo.descripcion}
+              {grupo.descripcion || '-'}
             </td>
             <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
               {new Date(grupo.fecha_creacion).toLocaleString()}
@@ -340,7 +357,7 @@ const cerrarModalConfirmacion = () => {
           editando: 'Editar Grupo'
         }}
         campos={[
-          { name: 'grupo', label: 'Número de Grupo', placeholder: 'Ej: 1, 2, 3...' },
+          { name: 'grupo', label: 'Número de Grupo', placeholder: 'Ej: 1, 2, 3...', required: true },
           { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción del grupo' }
         ]}
       />

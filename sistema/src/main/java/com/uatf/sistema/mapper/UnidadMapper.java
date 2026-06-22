@@ -12,7 +12,7 @@ public class UnidadMapper {
             entidad.getSigla(),
             entidad.getItem(),
             entidad.getTipo_unidad().getId(),
-            entidad.getTipo_unidad().getDescripcion(),
+            entidad.getTipo_unidad().getTipo(),
             entidad.getUnidad() != null ? entidad.getUnidad().getId() : null,
             entidad.getUnidad() != null ? entidad.getUnidad().getNombre() : null,
             entidad.getFecha_creacion(),

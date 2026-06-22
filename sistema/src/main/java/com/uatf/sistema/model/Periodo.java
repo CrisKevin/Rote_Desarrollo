@@ -1,5 +1,6 @@
 package com.uatf.sistema.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +31,9 @@ public class Periodo {
 
     private String descripcion;
 
-    private LocalDateTime desde;
+    private LocalDate desde;
     
-    private LocalDateTime hasta;
+    private LocalDate hasta;
 
     @CreationTimestamp
     private LocalDateTime fecha_creacion;

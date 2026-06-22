@@ -7,6 +7,10 @@ export const unidadService = {
         return await api.get(BASE_URL);
     },
 
+    getAllActive: async () => {
+        return await api.get(`${BASE_URL}/active`);
+    },
+
     crear: async (cargo) => {
         return await api.post(BASE_URL, cargo);
     },
@@ -17,5 +21,9 @@ export const unidadService = {
 
     eliminar: async (id) => {
         return await api.delete(`${BASE_URL}/${id}`);
+    },
+    
+    eliminarSuave: async (id) => {
+        return await api.delete(`${BASE_URL}/active/${id}`);
     }
 };

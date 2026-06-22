@@ -3,9 +3,11 @@ package com.uatf.sistema.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.GestionDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.GestionMapper;
 import com.uatf.sistema.model.Gestion;
@@ -48,7 +50,11 @@ public class GestionService {
 
         Gestion gestion = GestionMapper.toEntity(dto);
 
-        return GestionMapper.toDTO(repo.save(gestion));
+        try{
+            return GestionMapper.toDTO(repo.save(gestion));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe una gestión con este nombre");
+        }
     }
 
     public GestionDTO update(UUID id, GestionDTO dto){
@@ -59,7 +65,11 @@ public class GestionService {
         gestion.setGestion(dto.getGestion());
         gestion.setDescripcion(dto.getDescripcion());
 
-        return GestionMapper.toDTO(repo.save(gestion));
+        try{
+            return GestionMapper.toDTO(repo.save(gestion));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe una gestión con este nombre");
+        }
     }
 
     public void delete(UUID id){

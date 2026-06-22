@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.CargoDocenteDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.CargoDocenteMapper;
 import com.uatf.sistema.model.CargoDocente;
@@ -45,7 +47,12 @@ public class CargoDocenteService {
 
     public CargoDocenteDTO create(CargoDocenteDTO dto){
         CargoDocente cargoDocente = CargoDocenteMapper.toEntity(dto);
-        return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
+
+        try{
+            return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un cargo de docente con este nombre");
+        }
     }
 
     public CargoDocenteDTO update(UUID id, CargoDocenteDTO dto){
@@ -55,7 +62,12 @@ public class CargoDocenteService {
         cargoDocente.setCargo(dto.getCargo());
         cargoDocente.setDescripcion(dto.getDescripcion());
 
-        return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
+        try{
+            return CargoDocenteMapper.toDTO(repo.save(cargoDocente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un cargo de docente con este nombre");
+        }
+        
     }
 
     public void delete(UUID id){

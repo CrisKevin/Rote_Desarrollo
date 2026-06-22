@@ -3,9 +3,11 @@ package com.uatf.sistema.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.uatf.sistema.dto.TipoDocenteDTO;
+import com.uatf.sistema.exceptions.DuplicateResourceException;
 import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.TipoDocenteMapper;
 import com.uatf.sistema.model.TipoDocente;
@@ -48,7 +50,11 @@ public class TipoDocenteService {
 
         TipoDocente tipoDocente = TipoDocenteMapper.toEntity(dto);
 
-        return TipoDocenteMapper.toDTO(repo.save(tipoDocente));
+        try{
+            return TipoDocenteMapper.toDTO(repo.save(tipoDocente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un tipo de docente con este nombre");
+        }
     }
 
     public TipoDocenteDTO update(UUID id, TipoDocenteDTO dto){
@@ -59,7 +65,11 @@ public class TipoDocenteService {
         tipoDocente.setTipo(dto.getTipo());
         tipoDocente.setDescripcion(dto.getDescripcion());
 
-        return TipoDocenteMapper.toDTO(repo.save(tipoDocente));
+        try{
+            return TipoDocenteMapper.toDTO(repo.save(tipoDocente));
+        }catch(DataIntegrityViolationException e){
+            throw new DuplicateResourceException("Ya existe un tipo de docente con este nombre");
+        }
     }
 
     public void delete(UUID id){

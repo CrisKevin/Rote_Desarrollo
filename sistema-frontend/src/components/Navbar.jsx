@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, LogOut, Lock, Moon, Sun } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 

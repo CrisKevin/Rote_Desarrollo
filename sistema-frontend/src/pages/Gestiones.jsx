@@ -73,11 +73,16 @@ export default function Gestiones() {
   };
 
   const guardarItem = async () => {
-    if (!formData.gestion.trim()) {
-      setErrorFormulario('Por favor completa el campo Gestión');
+    if (!formData.gestion) {
+      setErrorFormulario('Por favor complete el campo obligatorio');
       return;
     }
     
+    if (isNaN(formData.gestion) || formData.gestion <= 0) {
+      setErrorFormulario('El item debe ser un número positivo');
+      return;
+    }
+
     setErrorFormulario('');
     setCargando(true);
     
@@ -87,20 +92,32 @@ export default function Gestiones() {
     };
     
     if (itemEditando) {
-      const { error } = await gestionService.actualizar(itemEditando.id, datosEnviar);
-      if (!error) {
+      const result = await gestionService.actualizar(itemEditando.id, datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al actualizar: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al actualizar: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al actualizar: ' + result.error);
+        }
       }
     } else {
-      const { error } = await gestionService.crear(datosEnviar);
-      if (!error) {
+      const result = await gestionService.crear(datosEnviar);
+      if (!result.error) {
         await cargarItems();
         cerrarModal();
       } else {
-        setErrorFormulario('Error al crear: ' + error);
+        try {
+            const errorObj = JSON.parse(result.error);
+            const mensajeError = errorObj.error || result.error;
+            setErrorFormulario('Error al crear: ' + mensajeError);
+        } catch {
+            setErrorFormulario('Error al crear: ' + result.error);
+        }
       }
     }
     
@@ -214,7 +231,7 @@ export default function Gestiones() {
         </div>
         <button 
           onClick={abrirModalNuevo}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
           Nueva Gestión
@@ -334,7 +351,7 @@ export default function Gestiones() {
           editando: 'Editar Gestión'
         }}
         campos={[
-          { name: 'gestion', label: 'Gestión', placeholder: 'Ej: 2025, 2026...', required: true },
+          { name: 'gestion', label: 'Gestión', placeholder: 'Ej: 2025, 2026...', numeric: true , required: true },
           { name: 'descripcion', label: 'Descripción', placeholder: 'Descripción de la gestión' }
         ]}
       />
