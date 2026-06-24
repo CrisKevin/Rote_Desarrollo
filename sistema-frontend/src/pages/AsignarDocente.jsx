@@ -313,6 +313,29 @@ export default function AsignarDocente() {
     );
   });
 
+  const formatearHoras = (horasAsignadas) => {
+    if (!horasAsignadas) return 'Sin horas';
+    
+    // Si es string "02:00:00"
+    if (typeof horasAsignadas === 'string' && horasAsignadas.includes(':')) {
+      const partes = horasAsignadas.split(':');
+      const horas = parseInt(partes[0]);
+      const minutos = parseInt(partes[1]);
+      
+      if (horas === 0 && minutos === 0) return '0 horas';
+      if (horas === 1) return `${horas} hora`;
+      return `${horas} horas`;
+    }
+    
+    // Si es número (horas)
+    if (typeof horasAsignadas === 'number') {
+      if (horasAsignadas === 1) return '1 hora';
+      return `${horasAsignadas} horas`;
+    }
+    
+    return 'Sin horas';
+  };
+
   // Pantalla de carga
   if (cargando && items.length === 0) {
     return (
@@ -594,7 +617,9 @@ export default function AsignarDocente() {
             label: 'Asignatura', 
             type: 'select',
             options: asignaturas,
-            optionLabel: (option) => `${option.nombre} (${option.unidad_nombre || 'Sin unidad'})`,
+            optionLabel: (option) => {
+              const horasTexto = formatearHoras(option.horas_asignadas);
+              return `${option.nombre} (${option.unidad_nombre || 'Sin unidad'}) - ${horasTexto}`},
             optionValue: 'id',
             placeholder: 'Seleccione una asignatura',
             required: true

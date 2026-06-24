@@ -89,6 +89,7 @@ public class DocenteService {
         docente.setApellidos(dto.getApellidos());
         docente.setObservaciones(dto.getObservaciones());
         docente.setDedicacion(dto.getDedicacion());
+        docente.setItem(dto.getItem());
         docente.setCi(dto.getCi());
         docente.setCargo_tipo(cargoTipo);
         docente.setUnidad(unidad);

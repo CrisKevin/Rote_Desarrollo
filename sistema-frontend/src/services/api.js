@@ -1,5 +1,5 @@
 // src/services/api.js
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://3w1cql6z-8080.brs.devtunnels.ms/api';
 
 console.log('🔧 API Configurada con URL:', API_URL);
 

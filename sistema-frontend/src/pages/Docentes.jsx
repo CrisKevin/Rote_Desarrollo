@@ -29,6 +29,7 @@ export default function Docentes() {
     ci: '',
     observaciones: '',
     dedicacion: '',
+    item: '', // ✅ NUEVO: Agregado campo item
     tipo_docente_id: '',
     cargo_docente_id: '',
     cargo_tipo_id: '',
@@ -122,6 +123,7 @@ export default function Docentes() {
       ci: '', 
       observaciones: '',
       dedicacion: '',
+      item: '', // ✅ NUEVO: Agregado campo item
       tipo_docente_id: '',
       cargo_docente_id: '',
       cargo_tipo_id: '',
@@ -144,6 +146,7 @@ export default function Docentes() {
       ci: docente.ci,
       observaciones: docente.observaciones || '',
       dedicacion: docente.dedicacion || '',
+      item: docente.item || '', // ✅ NUEVO: Agregado campo item
       tipo_docente_id: relacionEncontrada?.tipo_docente_id || '',
       cargo_docente_id: relacionEncontrada?.cargo_docente_id || '',
       cargo_tipo_id: docente.cargo_tipo_id || '',
@@ -162,6 +165,7 @@ export default function Docentes() {
       ci: '', 
       observaciones: '',
       dedicacion: '',
+      item: '', // ✅ NUEVO: Agregado campo item
       tipo_docente_id: '',
       cargo_docente_id: '',
       cargo_tipo_id: '',
@@ -208,6 +212,7 @@ export default function Docentes() {
       ci: formData.ci,
       observaciones: formData.observaciones,
       dedicacion: formData.dedicacion.toUpperCase().trim(),
+      item: formData.item.toUpperCase().trim(), // ✅ NUEVO: Agregado campo item
       cargo_tipo_id: relacionEncontrada?.id || null,
       unidad_id: formData.unidad_id || null
     };
@@ -291,7 +296,8 @@ export default function Docentes() {
       docente.ci?.toLowerCase().includes(terminoBusqueda) ||
       docente.tipo_docente_nombre?.toLowerCase().includes(terminoBusqueda) ||
       docente.cargo_docente_nombre?.toLowerCase().includes(terminoBusqueda) ||
-      docente.unidad_nombre?.toLowerCase().includes(terminoBusqueda)
+      docente.unidad_nombre?.toLowerCase().includes(terminoBusqueda) ||
+      (docente.item && docente.item?.toLowerCase().includes(terminoBusqueda)) // ✅ NUEVO: Búsqueda por item
     );
   });
 
@@ -371,7 +377,7 @@ export default function Docentes() {
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar por nombres, apellidos, CI, tipo de docente, cargo o unidad..."
+            placeholder="Buscar por nombres, apellidos, CI, tipo de docente, cargo, unidad o item..." // ✅ NUEVO: Actualizado placeholder
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
@@ -393,6 +399,9 @@ export default function Docentes() {
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
                   CI
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                  Item {/* ✅ NUEVO: Columna Item */}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
                   Tipo de Docente
@@ -434,6 +443,9 @@ export default function Docentes() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {docente.ci}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    {docente.item ? String(docente.item).padStart(4, '0') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {docente.tipo_docente_nombre || '-'}
@@ -519,6 +531,7 @@ export default function Docentes() {
           { name: 'nombres', label: 'Nombres', placeholder: 'Ej: Juan Carlos', required: true },
           { name: 'apellidos', label: 'Apellidos', placeholder: 'Ej: Pérez García', required: true },
           { name: 'ci', label: 'Cédula de Identidad', placeholder: 'Ej: 12345678', required: true },
+          { name: 'item', label: 'Item', placeholder: 'Ej: 001, 002, 003', required: false }, // ✅ NUEVO: Campo item en formulario
           { name: 'dedicacion', label: 'Dedicación', placeholder: 'Ej: Tiempo completo, Medio tiempo', required: true},
           { 
             name: 'tipo_docente_id', 

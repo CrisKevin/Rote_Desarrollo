@@ -15,6 +15,7 @@ public class DocenteDTO {
     private String ci;
     private String observaciones;
     private String dedicacion;
+    private String item;
     private UUID cargo_tipo_id;
     private String tipo_docente_nombre;
     private String cargo_docente_nombre;

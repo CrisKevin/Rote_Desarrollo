@@ -40,6 +40,8 @@ public class Docente {
 
     private String dedicacion;
 
+    private String item;
+
     @CreationTimestamp
     private LocalDateTime fecha_creacion;
 
