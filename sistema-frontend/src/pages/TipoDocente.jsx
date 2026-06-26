@@ -158,7 +158,7 @@ export default function TipoDocente() {
   const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
-      item.tipo.toLowerCase().includes(terminoBusqueda) ||
+      item.tipo && item.tipo.toLowerCase().includes(terminoBusqueda) ||
       (item.descripcion && item.descripcion.toLowerCase().includes(terminoBusqueda))
     );
   });

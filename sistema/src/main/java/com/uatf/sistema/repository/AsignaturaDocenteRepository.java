@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.uatf.sistema.model.AsignaturaDocente;
 import com.uatf.sistema.dto.ReportesDTO;
+import com.uatf.sistema.model.AsignaturaDocente;
 
 public interface AsignaturaDocenteRepository extends JpaRepository<AsignaturaDocente, UUID> {
 
@@ -28,7 +28,8 @@ public interface AsignaturaDocenteRepository extends JpaRepository<AsignaturaDoc
            "CAST(SUBSTRING(CAST(a.asignatura.horas_asignadas AS string), 1, 2) AS integer), " +
            "a.observacion.descripcion, " +
            "a.periodo.descripcion, " +
-           "a.periodo.gestion.gestion) " +
+           "a.periodo.gestion.gestion, " +
+           "CAST(i.item AS string)) " + 
            "FROM AsignaturaDocente a " +
            "LEFT JOIN a.unidad " +
            "LEFT JOIN a.grupo " +
@@ -38,6 +39,7 @@ public interface AsignaturaDocenteRepository extends JpaRepository<AsignaturaDoc
            "LEFT JOIN a.asignatura " +
            "LEFT JOIN a.observacion " +
            "LEFT JOIN a.periodo " +
+           "LEFT JOIN d.item i " +
            "WHERE (:unidad_id IS NULL OR a.unidad.id = :unidad_id) " +
            "AND a.estado = true " +
            "ORDER BY a.unidad.nombre ASC, d.apellidos ASC")
@@ -57,7 +59,8 @@ public interface AsignaturaDocenteRepository extends JpaRepository<AsignaturaDoc
        "CAST(SUBSTRING(CAST(a.asignatura.horas_asignadas AS string), 1, 2) AS integer), " +
        "a.observacion.descripcion, " +
        "a.periodo.descripcion, " +
-       "a.periodo.gestion.gestion) " +
+       "a.periodo.gestion.gestion, " +
+       "CAST(i.item AS string)) " + 
        "FROM AsignaturaDocente a " +
        "LEFT JOIN a.unidad " +
        "LEFT JOIN a.grupo " +
@@ -67,6 +70,7 @@ public interface AsignaturaDocenteRepository extends JpaRepository<AsignaturaDoc
        "LEFT JOIN a.asignatura " +
        "LEFT JOIN a.observacion " +
        "LEFT JOIN a.periodo " +
+       "LEFT JOIN d.item i " +
        "WHERE (a.unidad.id = :unidadId " +           // Su unidad
        "OR a.unidad.unidad.id = :unidadId) " +  // O unidades que dependen de él
        "AND a.estado = true " +                      // Que el estado sea verdadero

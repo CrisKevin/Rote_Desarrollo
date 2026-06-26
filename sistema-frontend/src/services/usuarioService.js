@@ -4,6 +4,10 @@ import api from './api';
 const BASE_URL = '/auth';
 
 export const usuarioService = {
+    verificarSesion: async () => {
+        return await api.get(`${BASE_URL}/verificar`);
+    },
+
     getAll: async () => {
         return await api.get(BASE_URL);
     },

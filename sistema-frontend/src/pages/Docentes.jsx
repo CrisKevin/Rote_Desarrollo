@@ -1,9 +1,10 @@
 // src/pages/Docentes.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback} from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { docenteService } from '../services/docenteService';
 import { unidadService } from '../services/unidadService';
 import { tipoCargoService } from '../services/tipoCargoService';
+import { itemService } from '../services/itemService'; // ✅ Importar itemService
 import ModalFormulario from '../components/ModalFormulario';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 
@@ -19,6 +20,8 @@ export default function Docentes() {
   const [errorFormulario, setErrorFormulario] = useState('');
   const [unidades, setUnidades] = useState([]);
   const [tiposCargo, setTiposCargo] = useState([]);
+  const [items, setItems] = useState([]); // ✅ Nuevo estado para items
+  
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = user?.role || 'ROLE_USER';
   const isAdmin = userRole === 'ROLE_ADMIN';
@@ -29,7 +32,7 @@ export default function Docentes() {
     ci: '',
     observaciones: '',
     dedicacion: '',
-    item: '', // ✅ NUEVO: Agregado campo item
+    item_id: '', // ✅ Cambio: ahora es item_id
     tipo_docente_id: '',
     cargo_docente_id: '',
     cargo_tipo_id: '',
@@ -59,7 +62,6 @@ export default function Docentes() {
         });
       }
     });
-      
 
     return cargosUnicos;
   })();
@@ -69,10 +71,9 @@ export default function Docentes() {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = isAdmin? await docenteService.getAll() : await docenteService.getAllActive();
+    const { data, error: errorMsg } = isAdmin ? await docenteService.getAll() : await docenteService.getAllActive();
     
     if (data) {
-      // Ordenar por fecha_creacion (más reciente primero)
       const docentesOrdenados = [...data].sort((a, b) => {
         return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
       });
@@ -85,9 +86,9 @@ export default function Docentes() {
   }, [isAdmin]);
 
   // Función para cargar unidades
-  const cargarUnidades = useCallback (async () => {
+  const cargarUnidades = useCallback(async () => {
     try {
-      const { data } = isAdmin? await unidadService.getAll() : await unidadService.getAllActive;
+      const { data } = isAdmin ? await unidadService.getAll() : await unidadService.getAllActive();
       if (data) {
         const unidadesOrdenadas = [...data].sort((a, b) => {
           return a.nombre.localeCompare(b.nombre);
@@ -97,13 +98,12 @@ export default function Docentes() {
     } catch (error) {
       console.error('Error cargando unidades:', error);
     }
-  },[isAdmin]);
+  }, [isAdmin]);
 
   // Función para cargar tipos de cargo
-  const cargarTiposCargo = useCallback( async () => {
+  const cargarTiposCargo = useCallback(async () => {
     try {
-
-      const { data } = isAdmin? await tipoCargoService.getAll() : await tipoCargoService.getAllActive();
+      const { data } = isAdmin ? await tipoCargoService.getAll() : await tipoCargoService.getAllActive();
       if (data) {
         const tiposOrdenados = [...data].sort((a, b) => {
           return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
@@ -113,7 +113,22 @@ export default function Docentes() {
     } catch (error) {
       console.error('Error cargando tipos de cargo:', error);
     }
-  },[isAdmin]);
+  }, [isAdmin]);
+
+  // ✅ Función para cargar items
+  const cargarItems = useCallback(async () => {
+    try {
+      const { data } = isAdmin ? await itemService.getAll() : await itemService.getAllActive();
+      if (data) {
+        const itemsOrdenados = [...data].sort((a, b) => {
+          return a.item - b.item; // Ordenar por número de item
+        });
+        setItems(itemsOrdenados);
+      }
+    } catch (error) {
+      console.error('Error cargando items:', error);
+    }
+  }, [isAdmin]);
 
   const abrirModalNuevo = () => {
     setDocenteEditando(null);
@@ -123,7 +138,7 @@ export default function Docentes() {
       ci: '', 
       observaciones: '',
       dedicacion: '',
-      item: '', // ✅ NUEVO: Agregado campo item
+      item_id: '', // ✅ Cambio
       tipo_docente_id: '',
       cargo_docente_id: '',
       cargo_tipo_id: '',
@@ -137,7 +152,7 @@ export default function Docentes() {
     setDocenteEditando(docente);
 
     const relacionEncontrada = tiposCargo.find(
-    tc => tc.id === docente.cargo_tipo_id
+      tc => tc.id === docente.cargo_tipo_id
     );
 
     setFormData({
@@ -146,7 +161,7 @@ export default function Docentes() {
       ci: docente.ci,
       observaciones: docente.observaciones || '',
       dedicacion: docente.dedicacion || '',
-      item: docente.item || '', // ✅ NUEVO: Agregado campo item
+      item_id: docente.item_id || '', // ✅ Cambio
       tipo_docente_id: relacionEncontrada?.tipo_docente_id || '',
       cargo_docente_id: relacionEncontrada?.cargo_docente_id || '',
       cargo_tipo_id: docente.cargo_tipo_id || '',
@@ -165,7 +180,7 @@ export default function Docentes() {
       ci: '', 
       observaciones: '',
       dedicacion: '',
-      item: '', // ✅ NUEVO: Agregado campo item
+      item_id: '', // ✅ Cambio
       tipo_docente_id: '',
       cargo_docente_id: '',
       cargo_tipo_id: '',
@@ -178,7 +193,6 @@ export default function Docentes() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'tipo_docente_id') {
-      // Limpiar cargo seleccionado
       setFormData({ 
         ...formData, 
         tipo_docente_id: value, 
@@ -200,7 +214,6 @@ export default function Docentes() {
     setErrorFormulario('');
     setCargando(true);
     
-    // Buscar el ID de la relación tipo_cargo
     const relacionEncontrada = tiposCargo.find(
       tc => tc.tipo_docente_id === formData.tipo_docente_id && 
             tc.cargo_docente_id === formData.cargo_docente_id
@@ -212,7 +225,7 @@ export default function Docentes() {
       ci: formData.ci,
       observaciones: formData.observaciones,
       dedicacion: formData.dedicacion.toUpperCase().trim(),
-      item: formData.item.toUpperCase().trim(), // ✅ NUEVO: Agregado campo item
+      item_id: formData.item_id || null, // ✅ Cambio
       cargo_tipo_id: relacionEncontrada?.id || null,
       unidad_id: formData.unidad_id || null
     };
@@ -224,11 +237,11 @@ export default function Docentes() {
         cerrarModal();
       } else {
         try {
-            const errorObj = JSON.parse(result.error);
-            const mensajeError = errorObj.error || result.error;
-            setErrorFormulario('Error al actualizar: ' + mensajeError);
+          const errorObj = JSON.parse(result.error);
+          const mensajeError = errorObj.error || result.error;
+          setErrorFormulario('Error al actualizar: ' + mensajeError);
         } catch {
-            setErrorFormulario('Error al actualizar: ' + result.error);
+          setErrorFormulario('Error al actualizar: ' + result.error);
         }
       }
     } else {
@@ -238,11 +251,11 @@ export default function Docentes() {
         cerrarModal();
       } else {
         try {
-            const errorObj = JSON.parse(result.error);
-            const mensajeError = errorObj.error || result.error;
-            setErrorFormulario('Error al crear: ' + mensajeError);
+          const errorObj = JSON.parse(result.error);
+          const mensajeError = errorObj.error || result.error;
+          setErrorFormulario('Error al crear: ' + mensajeError);
         } catch {
-            setErrorFormulario('Error al crear: ' + result.error);
+          setErrorFormulario('Error al crear: ' + result.error);
         }
       }
     }
@@ -261,7 +274,7 @@ export default function Docentes() {
     
     setModalConfirmacionAbierto(false);
     setCargando(true);
-    const { error } = isAdmin? await docenteService.eliminar(docenteAEliminar.id) : await docenteService.eliminarSoft(docenteAEliminar.id);
+    const { error } = isAdmin ? await docenteService.eliminar(docenteAEliminar.id) : await docenteService.eliminarSoft(docenteAEliminar.id);
     
     if (!error) {
       await cargarDocentes();
@@ -284,8 +297,9 @@ export default function Docentes() {
       cargarDocentes();
       cargarUnidades();
       cargarTiposCargo();
+      cargarItems(); // ✅ Agregar carga de items
     }
-  }, [cargarDocentes, cargarTiposCargo, cargarUnidades]);
+  }, [cargarDocentes, cargarTiposCargo, cargarUnidades, cargarItems]);
 
   // Filtrar docentes
   const docentesFiltrados = docentes.filter((docente) => {
@@ -297,7 +311,7 @@ export default function Docentes() {
       docente.tipo_docente_nombre?.toLowerCase().includes(terminoBusqueda) ||
       docente.cargo_docente_nombre?.toLowerCase().includes(terminoBusqueda) ||
       docente.unidad_nombre?.toLowerCase().includes(terminoBusqueda) ||
-      (docente.item && docente.item?.toLowerCase().includes(terminoBusqueda)) // ✅ NUEVO: Búsqueda por item
+      (docente.item_nombre && docente.item_nombre.toString().includes(terminoBusqueda))
     );
   });
 
@@ -377,7 +391,7 @@ export default function Docentes() {
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar por nombres, apellidos, CI, tipo de docente, cargo, unidad o item..." // ✅ NUEVO: Actualizado placeholder
+            placeholder="Buscar por nombres, apellidos, CI, tipo de docente, cargo, unidad o item..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
@@ -401,7 +415,7 @@ export default function Docentes() {
                   CI
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Item {/* ✅ NUEVO: Columna Item */}
+                  Item
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
                   Tipo de Docente
@@ -445,7 +459,7 @@ export default function Docentes() {
                     {docente.ci}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {docente.item ? String(docente.item).padStart(4, '0') : '-'}
+                    {docente.item_nombre ? String(docente.item_nombre).padStart(4, '0') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                     {docente.tipo_docente_nombre || '-'}
@@ -530,9 +544,29 @@ export default function Docentes() {
         campos={[
           { name: 'nombres', label: 'Nombres', placeholder: 'Ej: Juan Carlos', required: true },
           { name: 'apellidos', label: 'Apellidos', placeholder: 'Ej: Pérez García', required: true },
-          { name: 'ci', label: 'Cédula de Identidad', placeholder: 'Ej: 12345678', required: true },
-          { name: 'item', label: 'Item', placeholder: 'Ej: 001, 002, 003', required: false }, // ✅ NUEVO: Campo item en formulario
-          { name: 'dedicacion', label: 'Dedicación', placeholder: 'Ej: Tiempo completo, Medio tiempo', required: true},
+          { name: 'ci', label: 'Cédula de Identidad', placeholder: 'Ej: 12345678',numeric: true, required: true },
+          { 
+            name: 'item_id', // ✅ Cambio: ahora es item_id
+            label: 'Item', 
+            type: 'select', // ✅ Cambio: ahora es select
+            options: items,
+            optionLabel: (item) => `${String(item.item).padStart(4, '0')} - ${item.dedicacion}`,
+            optionValue: 'id',
+            placeholder: 'Seleccione un item',
+            required: false
+          },
+          { name: 'dedicacion', 
+            label: 'Dedicación', 
+            type: 'select',
+            options: [
+              {id: 'T/C', nombre: 'T/C'},
+              {id: 'T/H', nombre: 'T/H'}
+            ],
+            optionLabel: 'nombre',
+            optionValue: 'id',  
+            placeholder: 'Seleccione una dedicación', 
+            required: true
+          },
           { 
             name: 'tipo_docente_id', 
             label: 'Tipo de Docente', 

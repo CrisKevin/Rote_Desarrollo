@@ -69,6 +69,9 @@ public class ReporteService {
         Map<String, Integer> totalHorasPorDocente = new LinkedHashMap<>();
         
         for(ReportesDTO reporte : reportes){
+            int sumar = 4 - reporte.getItem().length();
+            String ceros = "0".repeat(sumar);
+            reporte.setItem(ceros + reporte.getItem());
             String docente = reporte.getDocenteNombre() + " " + reporte.getDocenteApellido();
             reportesPorDocente.computeIfAbsent(docente, k -> new ArrayList<>()).add(reporte);
             Integer horas = reporte.getHoras() != null ? reporte.getHoras() : 0;

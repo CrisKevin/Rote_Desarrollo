@@ -12,9 +12,11 @@ import com.uatf.sistema.exceptions.ResourceNotFoundException;
 import com.uatf.sistema.mapper.DocenteMapper;
 import com.uatf.sistema.model.CargoTipo;
 import com.uatf.sistema.model.Docente;
+import com.uatf.sistema.model.Item;
 import com.uatf.sistema.model.Unidad;
 import com.uatf.sistema.repository.CargoTipoRepository;
 import com.uatf.sistema.repository.DocenteRepository;
+import com.uatf.sistema.repository.ItemRepository;
 import com.uatf.sistema.repository.UnidadRepository;
 
 @Service
@@ -23,11 +25,14 @@ public class DocenteService {
     private final DocenteRepository repo;
     private final CargoTipoRepository cargo_tipo_repo;
     private final UnidadRepository unidad_repo;
+    private final ItemRepository item_repo;
 
-    public DocenteService(DocenteRepository repo, CargoTipoRepository cargo_tipo_repo, UnidadRepository unidad_repo){
+    public DocenteService(DocenteRepository repo, CargoTipoRepository cargo_tipo_repo, 
+            UnidadRepository unidad_repo, ItemRepository item_repo){
         this.repo = repo;
         this.cargo_tipo_repo = cargo_tipo_repo;
         this.unidad_repo = unidad_repo;
+        this.item_repo = item_repo;
     }
 
     public List<DocenteDTO> findAll(){
@@ -64,8 +69,12 @@ public class DocenteService {
         Unidad unidad = unidad_repo.findById(dto.getUnidad_id())
             .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
 
+        Item item = item_repo.findById(dto.getItem_id())
+            .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
+
         docente.setCargo_tipo(cargo_tipo);
         docente.setUnidad(unidad);
+        docente.setItem(item);
 
         try{
             return DocenteMapper.toDTO(repo.save(docente));
@@ -85,12 +94,15 @@ public class DocenteService {
         Unidad unidad = unidad_repo.findById(dto.getUnidad_id())
             .orElseThrow(() -> new ResourceNotFoundException("Unidad no encontrada"));
 
+        Item item = item_repo.findById(dto.getItem_id())
+            .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
+
         docente.setNombres(dto.getNombres());
         docente.setApellidos(dto.getApellidos());
         docente.setObservaciones(dto.getObservaciones());
         docente.setDedicacion(dto.getDedicacion());
-        docente.setItem(dto.getItem());
         docente.setCi(dto.getCi());
+        docente.setItem(item);
         docente.setCargo_tipo(cargoTipo);
         docente.setUnidad(unidad);
 

@@ -19,11 +19,58 @@ import AsignarDocente from './pages/AsignarDocente';
 import Reportes from './pages/Reportes';
 import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
+import Items from './pages/Items';
+
+import { useEffect, useState } from 'react';
+import { usuarioService } from './services/usuarioService';
 
 // Componente para proteger rutas que requieren autenticación
 const PrivateRoute = ({ children }) => {
+  const [verificando, setVerificando] = useState(true);
+  const [autenticado, setAutenticado] = useState(false);
   const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
+
+  useEffect(() => {
+    const verificarToken = async () => {
+      if (!token) {
+        setAutenticado(false);
+        setVerificando(false);
+        return;
+      }
+
+      try {
+        // Verifica el token en el backend
+        await usuarioService.verificarSesion();
+        setAutenticado(true);
+      } catch (error) {
+        // Token inválido o expirado
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setAutenticado(false);
+      } finally {
+        setVerificando(false);
+      }
+    };
+
+    verificarToken();
+  }, [token]);
+
+  // Muestra loading mientras verifica
+  if (verificando) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Si no está autenticado, redirige al login
+  if (!autenticado) {
+    return <Navigate to="/login" />;
+  }
+
+  // Si está autenticado, muestra el contenido
+  return children;
 };
 
 // Componente para proteger rutas por rol
@@ -239,6 +286,17 @@ function App() {
               <RoleRoute allowedRoles={['ROLE_ADMIN']}>
                 <DashboardLayout>
                   <Usuarios></Usuarios>
+                </DashboardLayout>
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/items"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN']}>
+                <DashboardLayout>
+                  <Items></Items>
                 </DashboardLayout>
               </RoleRoute>
             }

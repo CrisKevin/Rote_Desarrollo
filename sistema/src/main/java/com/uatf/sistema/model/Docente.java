@@ -40,8 +40,6 @@ public class Docente {
 
     private String dedicacion;
 
-    private String item;
-
     @CreationTimestamp
     private LocalDateTime fecha_creacion;
 
@@ -57,6 +55,10 @@ public class Docente {
     @ManyToOne
     @JoinColumn(name = "unidad_id", referencedColumnName = "id")
     private Unidad unidad;
+
+    @ManyToOne
+    @JoinColumn(name= "item_id", referencedColumnName="id")
+    private Item item;
 
     @OneToMany(mappedBy = "docente")
     private List<AsignaturaDocente> asignatura_docentes;

@@ -158,6 +158,7 @@
             <table class="tabla-principal">
                 <thead>
                     <tr>
+                        <th style="width: 8%">Item</th>
                         <th style="width: 10%">CI</th>
                         <th style="width: 20%">Docente</th>
                         <th style="width: 14%">Cargo</th>
@@ -166,7 +167,7 @@
                         <th style="width: 10%">Sigla</th>
                         <th style="width: 6%">Horas</th>
                         <th style="width: 8%">Total Horas</th>
-                        <th style="width: 18%">Observación</th>
+                        <th style="width: 10%">Observación</th>
                     </tr>
                 </thead>
                 
@@ -179,6 +180,11 @@
                         
                         <tr th:each="asignacion, iterStat : ${lista}">
                             
+                            <td th:if="${iterStat.index == 0}" 
+                                th:attr="rowspan=${lista.size()}"
+                                style="text-align: center; vertical-align: middle;" 
+                                th:text="${asignacion.item}">-</td>
+
                             <td th:if="${iterStat.index == 0}" 
                                 th:attr="rowspan=${lista.size()}"
                                 style="text-align: center; vertical-align: middle;" 

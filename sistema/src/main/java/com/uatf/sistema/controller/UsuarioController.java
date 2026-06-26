@@ -39,6 +39,11 @@ public class UsuarioController {
         this.authManager = authManager;
     }
 
+    @GetMapping("/verificar")
+    public void verificarSesion(){
+
+    }
+
     @GetMapping()
     public ResponseEntity<List<GetUsuarioDTO>> getUsuarios(){
         return ResponseEntity.ok(service.getUsers());

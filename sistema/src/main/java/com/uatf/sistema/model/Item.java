@@ -7,12 +7,11 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -21,16 +20,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Data
-@Table(name = "asignaturas")
-public class Asignatura {
+@Table(name="items")
+public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy=GenerationType.UUID)
     private UUID id;
 
-    private String nombre;
-    private String sigla;
-    private Integer horas_asignadas;
+    private String dedicacion;
+
+    @Column(unique = true)
+    private Integer item;
+
+    private Integer horasAsignadas;
 
     @CreationTimestamp
     private LocalDateTime fecha_creacion;
@@ -38,13 +40,6 @@ public class Asignatura {
     @UpdateTimestamp
     private LocalDateTime fecha_actualizacion;
 
-    private Boolean estado = true;
-
-    @ManyToOne
-    @JoinColumn(name = "unidad_id", referencedColumnName = "id")
-    private Unidad unidad;
-
-    @OneToMany(mappedBy = "asignatura")
-    private List<AsignaturaDocente> asignatura_docentes;
-    
+    @OneToMany(mappedBy="item")
+    private List<Docente> docentes;
 }

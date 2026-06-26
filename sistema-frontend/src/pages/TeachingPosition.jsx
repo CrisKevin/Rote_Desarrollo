@@ -158,8 +158,8 @@ export default function TeachingPosition() {
   const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
-      item.cargo.toLowerCase().includes(terminoBusqueda) ||
-      item.descripcion.toLowerCase().includes(terminoBusqueda)
+      item.cargo && item.cargo.toLowerCase().includes(terminoBusqueda) ||
+      item.descripcion && item.descripcion.toLowerCase().includes(terminoBusqueda)
     );
   });
 

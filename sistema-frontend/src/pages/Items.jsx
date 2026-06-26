@@ -1,12 +1,11 @@
-// src/pages/Asignaturas.jsx
+// src/pages/Items.jsx
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback} from 'react';
-import { asignaturaService } from '../services/asignaturaService';
-import { unidadService } from '../services/unidadService';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { itemService } from '../services/itemService';
 import ModalFormulario from '../components/ModalFormulario';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 
-export default function Asignaturas() {
+export default function Items() {
   const [items, setItems] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -16,27 +15,23 @@ export default function Asignaturas() {
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [errorFormulario, setErrorFormulario] = useState('');
-  const [unidades, setUnidades] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const userRole = user?.role || 'ROLE_USER';
-  const isAdmin = userRole === 'ROLE_ADMIN';
-
   
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
   const [formData, setFormData] = useState({
-    nombre: '',
-    sigla: '',
-    horas_asignadas: '',
-    unidad_id: ''
+    dedicacion: '',
+    item: '',
+    horasAsignadas: ''
   });
 
   const isFirstRender = useRef(true);
 
-  // Función para cargar asignaturas
-  const cargarItems = useCallback( async () => {
+  // Función para cargar items
+  const cargarItems = useCallback(async () => {
     setCargando(true);
     setError('');
     
-    const { data, error: errorMsg } = isAdmin? await asignaturaService.getAll() : await asignaturaService.getAllActive();
+    const { data, error: errorMsg } = await itemService.getAll()
     
     if (data) {
       // Ordenar por fecha_creacion (más reciente primero)
@@ -49,30 +44,14 @@ export default function Asignaturas() {
     }
     
     setCargando(false);
-  },[isAdmin]);
-
-  // Función para cargar unidades
-  const cargarUnidades = useCallback(async () => {
-    try {
-      const { data } = isAdmin? await unidadService.getAll() : await unidadService.getAllActive();
-      if (data) {
-        const unidadesOrdenadas = [...data].sort((a, b) => {
-          return a.nombre.localeCompare(b.nombre);
-        });
-        setUnidades(unidadesOrdenadas);
-      }
-    } catch (error) {
-      console.error('Error cargando unidades:', error);
-    }
-  },[isAdmin]);
+  });
 
   const abrirModalNuevo = () => {
     setItemEditando(null);
     setFormData({ 
-      nombre: '', 
-      sigla: '', 
-      horas_asignadas: '',
-      unidad_id: ''
+      dedicacion: '',
+      item: '',
+      horasAsignadas: ''
     });
     setErrorFormulario('');
     setModalAbierto(true);
@@ -80,12 +59,10 @@ export default function Asignaturas() {
 
   const abrirModalEditar = (item) => {
     setItemEditando(item);
-
     setFormData({
-      nombre: item.nombre,
-      sigla: item.sigla || '',
-      horas_asignadas: item.horas_asignadas || '',
-      unidad_id: item.unidad_id || ''
+      dedicacion: item.dedicacion || '',
+      item: item.item || '',
+      horasAsignadas: item.horasAsignadas || ''
     });
     setErrorFormulario('');
     setModalAbierto(true);
@@ -95,10 +72,9 @@ export default function Asignaturas() {
     setModalAbierto(false);
     setItemEditando(null);
     setFormData({ 
-      nombre: '', 
-      sigla: '', 
-      horas_asignadas: '',
-      unidad_id: ''
+      dedicacion: '',
+      item: '',
+      horasAsignadas: ''
     });
     setErrorFormulario('');
   };
@@ -109,38 +85,34 @@ export default function Asignaturas() {
   };
 
   const guardarItem = async () => {
-    if (!formData.nombre.trim() || !formData.sigla.trim() || !formData.horas_asignadas || !formData.unidad_id) {
+    if (!formData.dedicacion.trim() || !formData.item || !formData.horasAsignadas) {
       setErrorFormulario('Por favor complete todos los campos');
       return;
     }
-    
-    // Validar horas_asignadas (opcional) - debe ser número positivo
-    if (formData.horas_asignadas && (isNaN(formData.horas_asignadas) || formData.horas_asignadas <= 0)) {
+
+    // Validar que item sea número positivo
+    if (isNaN(formData.item) || formData.item <= 0) {
+      setErrorFormulario('El ítem debe ser un número positivo');
+      return;
+    }
+
+    // Validar que horasAsignadas sea número positivo
+    if (isNaN(formData.horasAsignadas) || formData.horasAsignadas <= 0) {
       setErrorFormulario('Las horas asignadas deben ser un número positivo');
       return;
     }
 
-    // Convertir horas a formato HH:MM:SS para el backend
-    let horasAsignadasFormateadas = null;
-    if (formData.horas_asignadas && !isNaN(formData.horas_asignadas) && formData.horas_asignadas > 0) {
-      const horasFloat = parseFloat(formData.horas_asignadas);
-      const horas = Math.floor(horasFloat);
-      const minutos = Math.round((horasFloat - horas) * 60);
-      horasAsignadasFormateadas = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`;
-    }
-    
     setErrorFormulario('');
     setCargando(true);
-    
+
     const datosEnviar = {
-      nombre: formData.nombre.toUpperCase().trim(),
-      sigla: formData.sigla.toUpperCase().trim() || null,
-      horas_asignadas: formData.horas_asignadas || null,
-      unidad_id: formData.unidad_id || null
+      dedicacion: formData.dedicacion.toUpperCase().trim(),
+      item: parseInt(formData.item),
+      horasAsignadas: parseInt(formData.horasAsignadas)
     };
-    
+
     if (itemEditando) {
-      const { error } = await asignaturaService.actualizar(itemEditando.id, datosEnviar);
+      const { error } = await itemService.actualizar(itemEditando.id, datosEnviar);
       if (!error) {
         await cargarItems();
         cerrarModal();
@@ -148,7 +120,7 @@ export default function Asignaturas() {
         setErrorFormulario('Error al actualizar: ' + error);
       }
     } else {
-      const { error } = await asignaturaService.crear(datosEnviar);
+      const { error } = await itemService.crear(datosEnviar);
       if (!error) {
         await cargarItems();
         cerrarModal();
@@ -156,7 +128,7 @@ export default function Asignaturas() {
         setErrorFormulario('Error al crear: ' + error);
       }
     }
-    
+
     setCargando(false);
   };
 
@@ -167,18 +139,19 @@ export default function Asignaturas() {
 
   const confirmarEliminar = async () => {
     if (!itemAEliminar) return;
-    
+
     setModalConfirmacionAbierto(false);
     setCargando(true);
-    
-    const { error } = isAdmin? await asignaturaService.eliminar(itemAEliminar.id) : await asignaturaService.eliminarSuave(itemAEliminar.id);
-    
+
+    const { error } = 
+      itemService.eliminar(itemAEliminar.id) 
+
     if (!error) {
       await cargarItems();
     } else {
       alert('Error al eliminar: ' + error);
     }
-    
+
     setCargando(false);
     setItemAEliminar(null);
   };
@@ -192,17 +165,16 @@ export default function Asignaturas() {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       cargarItems();
-      cargarUnidades();
     }
-  }, [cargarItems, cargarUnidades]);
+  }, [cargarItems]);
 
   // Filtrar items
   const itemsFiltrados = items.filter((item) => {
     const terminoBusqueda = searchTerm.toLowerCase();
     return (
-      item.nombre.toLowerCase().includes(terminoBusqueda) ||
-      (item.sigla && item.sigla.toLowerCase().includes(terminoBusqueda)) ||
-      (item.unidad_nombre && item.unidad_nombre.toLowerCase().includes(terminoBusqueda))
+      item.dedicacion?.toLowerCase().includes(terminoBusqueda) ||
+      (item.item && item.item.toString().includes(terminoBusqueda)) ||
+      (item.horasAsignadas && item.horasAsignadas.toString().includes(terminoBusqueda))
     );
   });
 
@@ -213,7 +185,7 @@ export default function Asignaturas() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Asignaturas
+              Ítems
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Cargando datos desde el servidor...
@@ -235,7 +207,7 @@ export default function Asignaturas() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Asignaturas
+              Ítems
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Error al conectar con el servidor
@@ -261,10 +233,10 @@ export default function Asignaturas() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Asignaturas
+            Ítems
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Gestiona todas las asignaturas del sistema
+            Gestiona todos los ítems del sistema
           </p>
         </div>
         <button 
@@ -272,7 +244,7 @@ export default function Asignaturas() {
           className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors dark:text-white dark:hover:bg-primary-dark/90"
         >
           <Plus className="w-5 h-5" />
-          Nueva Asignatura
+          Nuevo Ítem
         </button>
       </div>
 
@@ -282,7 +254,7 @@ export default function Asignaturas() {
           <Search className="w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar por nombre, sigla o unidad..."
+            placeholder="Buscar por dedicación, ítem o horas asignadas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400"
@@ -297,16 +269,13 @@ export default function Asignaturas() {
             <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Nombre
+                  Dedicación
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Sigla
+                  Ítem
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
                   Horas Asignadas
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                  Unidad
                 </th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white">
                   Fecha de Creación
@@ -326,16 +295,13 @@ export default function Asignaturas() {
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    {item.nombre}
+                    {item.dedicacion}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.sigla || '-'}
+                    {item.item ? String(item.item).padStart(4, '0') : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.horas_asignadas ? `${item.horas_asignadas}` : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                    {item.unidad_nombre || '-'}
+                    {item.horasAsignadas || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center">
                     {new Date(item.fecha_creacion).toLocaleString()}
@@ -364,7 +330,7 @@ export default function Asignaturas() {
             </tbody>
           </table>
         </div>
-        
+
         {itemsFiltrados.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">
@@ -372,7 +338,7 @@ export default function Asignaturas() {
             </p>
           </div>
         )}
-        
+
         <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Total: {items.length} registros | Mostrando: {itemsFiltrados.length}
@@ -382,8 +348,8 @@ export default function Asignaturas() {
 
       <ModalConfirmacion 
         abierto={modalConfirmacionAbierto}
-        titulo="Eliminar Asignatura"
-        mensaje={`¿Estás seguro de eliminar la asignatura "${itemAEliminar ? itemAEliminar.nombre : ''}"? Esta acción no se puede deshacer.`}
+        titulo="Eliminar Ítem"
+        mensaje={`¿Estás seguro de eliminar el ítem "${itemAEliminar ? itemAEliminar.dedicacion : ''}"? Esta acción no se puede deshacer.`}
         onConfirmar={confirmarEliminar}
         onCancelar={cerrarModalConfirmacion}
       />
@@ -397,22 +363,24 @@ export default function Asignaturas() {
         onInputChange={handleInputChange}
         error={errorFormulario}
         titulo={{
-          nuevo: 'Nueva Asignatura',
-          editando: 'Editar Asignatura'
+          nuevo: 'Nuevo Ítem',
+          editando: 'Editar Ítem'
         }}
         campos={[
-          { name: 'nombre', label: 'Nombre', placeholder: 'Ej: Taller de Redes'},
-          { name: 'sigla', label: 'Sigla', placeholder: 'Ej: SIS-625' },
-          { name: 'horas_asignadas', label: 'Horas Asignadas', placeholder: 'Ej: 2', numeric: true, step:'0.5' },
-          { 
-            name: 'unidad_id', 
-            label: 'Unidad', 
+          { name: 'dedicacion', 
+            label: 'Dedicación', 
             type: 'select',
-            options: unidades,
+            options: [
+              {id: 'T/C', nombre: 'T/C'},
+              {id: 'T/H', nombre: "T/H"}
+            ],
             optionLabel: 'nombre',
-            optionValue: 'id',
-            placeholder: 'Seleccione una unidad'
-          }
+            optionValue: 'id',  
+            placeholder: 'Seleccione una dedicación', 
+            required: true
+          },
+          { name: 'item', label: 'Ítem', placeholder: 'Ej: 1011', numeric: true },
+          { name: 'horasAsignadas', label: 'Horas Asignadas', placeholder: 'Ej: 40', numeric: true }
         ]}
       />
     </div>

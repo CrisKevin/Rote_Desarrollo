@@ -19,5 +19,5 @@ public class ReportesDTO {
     private String observacionDescripcion;
     private String periodoDescripcion;
     private String gestion;
-    
+    private String item;
 }

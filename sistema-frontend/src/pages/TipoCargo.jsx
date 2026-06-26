@@ -8,8 +8,8 @@ import ModalFormulario from '../components/ModalFormulario';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 
 // IDs CONSTANTES fuera del componente
-const ORDINARIO_TITULAR_ID = '3e2ed7b6-7306-4726-a770-86a6f4f0d35e';
-const ASISTENTE_AI_ID = '2cdd67e6-6b1a-4b74-adef-411ea0bb8222';
+const ORDINARIO_TITULAR_ID = 'af0baed1-1302-4c38-8274-9ea02e9f38bb';
+const ASISTENTE_AI_ID = '6c593007-bc8a-405f-8874-e1314edc489c';
 
 export default function TipoCargo() {
   const [items, setItems] = useState([]);

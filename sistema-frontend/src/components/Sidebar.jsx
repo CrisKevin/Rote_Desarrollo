@@ -59,6 +59,13 @@ export default function Sidebar() {
       roles: ['ROLE_ADMIN'] // Solo ROLE_ADMIN
     },
     {
+      id: 'item',
+      label: 'Items',
+      icon: UserCircle,
+      path: '/items',
+      roles: ['ROLE_ADMIN']
+    },
+    {
       id: 'docente',
       label: 'Docentes',
       icon: UserCircle,
